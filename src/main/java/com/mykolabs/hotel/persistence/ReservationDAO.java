@@ -33,17 +33,16 @@ public class ReservationDAO {
     }
 
     /**
-     * Returns all reservations from the Reservation table.
+     * Returns all reservations from the RESERVATION table.
      *
      * @param start
      * @param end
-     * @param flag
+     * @param useLimits
      * @return
      * @throws java.sql.SQLException
      */
     public List<Reservation> getAllReservations(int start, int end, boolean useLimits) throws SQLException {
 
-        Properties props = ConnectionHelper.getProperties();
         List<Reservation> rows = new ArrayList<>();
 
         String selectQuery = "SELECT RESERVATION_ID, CHECKIN_DATE, CHECKOUT_DATE, CUSTOMER_ID, ROOM_NUMBER, EMPLOYEE_ID "
@@ -81,7 +80,6 @@ public class ReservationDAO {
                     EmployeeDAO employeeDAO = new EmployeeDAO();
                     Employee employee = employeeDAO.getEmployee(resultSet.getInt("EMPLOYEE_ID"));
                             
-                    
                     reservationsData.setCustomerId(customer);
                     reservationsData.setRoomNumber(room);
                     reservationsData.setEmployeeId(employee);
@@ -95,19 +93,18 @@ public class ReservationDAO {
     }
 
     /**
-     * Returns single book from the INVENTORY table.
+     * Returns single reservation from the RESERVATION table.
      *
-     * @param isbn
+     * @param reservationID
      * @return
      */
-    public Inventory getBook(String isbn) throws SQLException {
+    public Reservation getReservation(int reservationID) throws SQLException {
 
         Properties props = ConnectionHelper.getProperties();
-        Inventory booksData = new Inventory();
+        Reservation reservationData = new Reservation();
 
-        String selectQuery = "SELECT ISBN, DATEOFENTRY, TITLE, AUTHORS, PUBLISHER, DATEOFPUBLICATION, PAGES, GENRE, IMAGE, COST, LIST, REMOVALSTATUS, DESCRIPTION "
-                + "FROM INVENTORY "
-                + "WHERE ISBN = ?";
+        String selectQuery = "SELECT RESERVATION_ID, CHECKIN_DATE, CHECKOUT_DATE, CUSTOMER_ID, ROOM_NUMBER, EMPLOYEE_ID "                 + "FROM RESERVATION "
+                + "WHERE RESERVATION_ID = ?";
 
         // Using Java 1.7 try with resources
         // This ensures that the objects in the parenthesis () will be closed
@@ -117,56 +114,47 @@ public class ReservationDAO {
                 // Using PreparedStatements to guard against SQL Injection
                 PreparedStatement pStatement = connection.prepareStatement(selectQuery);) {
 
-            pStatement.setString(1, isbn);
+            pStatement.setInt(1, reservationID);
 
             try (ResultSet resultSet = pStatement.executeQuery();) {
                 while (resultSet.next()) {
 
-                    booksData.setIsbn(resultSet.getString("ISBN"));
-                    booksData.setDateofentry(resultSet.getDate("DATEOFENTRY"));
-                    booksData.setTitle(resultSet.getString("TITLE"));
-                    booksData.setAuthors(resultSet.getString("AUTHORS"));
-                    booksData.setPublisher(resultSet.getString("PUBLISHER"));
-                    booksData.setDateofpublication(resultSet.getDate("DATEOFPUBLICATION"));
-                    booksData.setPages(resultSet.getInt("PAGES"));
-                    booksData.setGenre(resultSet.getString("GENRE"));
-
-                    // Validating image URL and if it's partial, adding domain URL
-                    if (isURL(resultSet.getString("IMAGE"))) {
-                        // Image path contains full URL, not adding domain path
-                        booksData.setImage(resultSet.getString("IMAGE"));
-                    } else {
-                        // adding full path to the image path, retrieved from the DB
-                        booksData.setImage(props.getProperty("IMAGE_BASE_URL_DEV") + resultSet.getString("IMAGE"));
-                    }
-
-                    booksData.setCost(resultSet.getBigDecimal("COST"));
-                    booksData.setList(resultSet.getBigDecimal("LIST"));
-                    booksData.setRemovalstatus(resultSet.getBoolean("REMOVALSTATUS"));
-                    booksData.setDescription(resultSet.getString("DESCRIPTION"));
+                    reservationData.setReservationId(resultSet.getInt("RESERVATION_ID"));
+                    reservationData.setCheckinDate(resultSet.getDate("CHECKIN_DATE"));
+                    reservationData.setCheckoutDate(resultSet.getDate("CHECKOUT_DATE"));
+                    
+                    CustomerDAO customerDAO = new CustomerDAO();
+                    Customer customer = customerDAO.getCustomer(resultSet.getInt("CUSTOMER_ID"));
+                    RoomDAO roomDAO = new RoomDAO();
+                    Room room = roomDAO.getRoom(resultSet.getInt("ROOM_NUMBER"));
+                    EmployeeDAO employeeDAO = new EmployeeDAO();
+                    Employee employee = employeeDAO.getEmployee(resultSet.getInt("EMPLOYEE_ID"));
+                            
+                    reservationData.setCustomerId(customer);
+                    reservationData.setRoomNumber(room);
+                    reservationData.setEmployeeId(employee);
 
                 }
             }
         }
-        log.log(Level.INFO, "Retrieved book with ISBN: {0}", booksData.getIsbn());
-        return booksData;
+        log.log(Level.INFO, "Retrieved reservation with reservationID: {0}", reservationData.getReservationId());
+        return reservationData;
     }
 
     /**
-     * Updates single book in the INVENTORY table.
+     * Updates single reservation in the RESERVATION table.
      *
-     * @param book
+     * @param reservation
      * @return
      * @throws java.sql.SQLException
      */
-    public int updateBook(Inventory book) throws SQLException {
+    public int updateReservation(Reservation reservation) throws SQLException {
         int result = 0;
 
-        String updateQuery = "UPDATE INVENTORY "
-                + "SET DATEOFENTRY=?, TITLE=?, AUTHORS=?, PUBLISHER=?, "
-                + "DATEOFPUBLICATION=?, PAGES=?, GENRE=?, IMAGE=?, COST=?, LIST=?, "
-                + "REMOVALSTATUS=?, DESCRIPTION=? "
-                + "WHERE ISBN=?";
+        String updateQuery = "UPDATE RESERVATION "
+                + "SET RESERVATION_ID=?, CHECKIN_DATE=?, CHECKOUT_DATE=?, "
+                + "CUSTOMER_ID=?, ROOM_NUMBER=?, EMPLOYEE_ID=? "
+                + "WHERE RESERVATION_ID=?";
 
         // Using Java 1.7 try with resources
         // This ensures that the objects in the parenthesis () will be closed
@@ -175,43 +163,36 @@ public class ReservationDAO {
         try (Connection connection = ConnectionHelper.getConnection();
                 // Using PreparedStatements to guard against SQL Injection
                 PreparedStatement pStatement = connection.prepareStatement(updateQuery);) {
-
-            pStatement.setDate(1, convertToSqlDate(book.getDateofentry()));
-            pStatement.setString(2, book.getTitle());
-            pStatement.setString(3, book.getAuthors());
-            pStatement.setString(4, book.getPublisher());
-            pStatement.setDate(5, convertToSqlDate(book.getDateofpublication()));
-            pStatement.setInt(6, book.getPages());
-            pStatement.setString(7, book.getGenre());
-            pStatement.setString(8, book.getImage());
-            pStatement.setBigDecimal(9, book.getCost());
-            pStatement.setBigDecimal(10, book.getList());
-            pStatement.setBoolean(11, book.getRemovalstatus());
-            pStatement.setString(12, book.getDescription());
-
-            pStatement.setString(13, book.getIsbn());
+            
+            pStatement.setInt(1, reservation.getReservationId());
+            pStatement.setDate(2, convertToSqlDate(reservation.getCheckinDate()));
+            pStatement.setDate(3, convertToSqlDate(reservation.getCheckoutDate()));
+            pStatement.setInt(4, reservation.getCustomerId().getCustomerId());
+            pStatement.setInt(5, reservation.getRoomNumber().getRoomNumber());
+            pStatement.setInt(6, reservation.getEmployeeId().getEmployeeId());
+            
+            pStatement.setInt(7, reservation.getReservationId());
 
             result = pStatement.executeUpdate();
         }
-        log.log(Level.INFO, "Updated book with ISBN: {0}", book.getIsbn());
+        log.log(Level.INFO, "Updated reservation with reservationID: {0}", reservation.getReservationId());
         return result;
     }
 
     /**
-     * Adds a single book into the INVENTORY table.
+     * Adds a single reservation into the RESERVATION table.
      *
-     * @param book
-     * @param isbn
+     * @param reservation
      * @return
+     * @throws java.sql.SQLException
      */
-    public int addBook(Inventory book) throws SQLException {
-        int result = 0;
+    public int addReservation(Reservation reservation) throws SQLException {
+        int result;
 
-        String createQuery = "INSERT INTO INVENTORY "
-                + "(ISBN, DATEOFENTRY, TITLE, AUTHORS, PUBLISHER, "
-                + "DATEOFPUBLICATION, PAGES, GENRE, IMAGE, COST, LIST, "
-                + "REMOVALSTATUS, DESCRIPTION) "
-                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        String createQuery = "INSERT INTO RESERVATION "
+                + "(CHECKIN_DATE, CHECKOUT_DATE, "
+                + "CUSTOMER_ID, ROOM_NUMBER, EMPLOYEE_ID) "
+                + "VALUES (?,?,?,?,?)";
 
         // Using Java 1.7 try with resources
         // This ensures that the objects in the parenthesis () will be closed
@@ -221,23 +202,15 @@ public class ReservationDAO {
                 // Using PreparedStatements to guard against SQL Injection
                 PreparedStatement pStatement = connection.prepareStatement(createQuery);) {
 
-            pStatement.setString(1, book.getIsbn());
-            pStatement.setDate(2, convertToSqlDate(book.getDateofentry()));
-            pStatement.setString(3, book.getTitle());
-            pStatement.setString(4, book.getAuthors());
-            pStatement.setString(5, book.getPublisher());
-            pStatement.setDate(6, convertToSqlDate(book.getDateofpublication()));
-            pStatement.setInt(7, book.getPages());
-            pStatement.setString(8, book.getGenre());
-            pStatement.setString(9, book.getImage());
-            pStatement.setBigDecimal(10, book.getCost());
-            pStatement.setBigDecimal(11, book.getList());
-            pStatement.setBoolean(12, book.getRemovalstatus());
-            pStatement.setString(13, book.getDescription());
+            pStatement.setDate(1, convertToSqlDate(reservation.getCheckinDate()));
+            pStatement.setDate(2, convertToSqlDate(reservation.getCheckoutDate()));
+            pStatement.setInt(3, reservation.getCustomerId().getCustomerId());
+            pStatement.setInt(4, reservation.getRoomNumber().getRoomNumber());
+            pStatement.setInt(5, reservation.getEmployeeId().getEmployeeId());
 
             result = pStatement.executeUpdate();
         }
-        log.log(Level.INFO, "Updated book with ISBN: {0}", book.getIsbn());
+        log.log(Level.INFO, "Created reservation with reservationID: {0}", reservation.getReservationId());
         return result;
     }
 
@@ -264,19 +237,4 @@ public class ReservationDAO {
 
         return localDateTime;
     }
-
-    /**
-     * URL validation helper method.
-     *
-     * @param path
-     * @return
-     */
-    private boolean isURL(String path) {
-
-        Pattern p = Pattern.compile(URL_REGEX);
-        Matcher m = p.matcher(path);
-
-        return m.find();
-    }
-
 }

@@ -6,6 +6,7 @@
 package com.mykolabs.hotel.beans;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,7 +34,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Payment.findByPaymentId", query = "SELECT p FROM Payment p WHERE p.paymentId = :paymentId"),
     @NamedQuery(name = "Payment.findByCardType", query = "SELECT p FROM Payment p WHERE p.cardType = :cardType"),
     @NamedQuery(name = "Payment.findByCardNumber", query = "SELECT p FROM Payment p WHERE p.cardNumber = :cardNumber"),
-    @NamedQuery(name = "Payment.findByCardExpiration", query = "SELECT p FROM Payment p WHERE p.cardExpiration = :cardExpiration")})
+    @NamedQuery(name = "Payment.findByCardExpiration", query = "SELECT p FROM Payment p WHERE p.cardExpiration = :cardExpiration"),
+    @NamedQuery(name = "Payment.findByPaymentAmount", query = "SELECT p FROM Payment p WHERE p.paymentAmount = :paymentAmount")})
 public class Payment implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -51,6 +53,9 @@ public class Payment implements Serializable {
     @Size(max = 45)
     @Column(name = "CARD_EXPIRATION")
     private String cardExpiration;
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
+    @Column(name = "PAYMENT_AMOUNT")
+    private BigDecimal paymentAmount;
     @Lob
     @Size(max = 65535)
     @Column(name = "DESCRIPTION")
@@ -99,6 +104,14 @@ public class Payment implements Serializable {
 
     public void setCardExpiration(String cardExpiration) {
         this.cardExpiration = cardExpiration;
+    }
+
+    public BigDecimal getPaymentAmount() {
+        return paymentAmount;
+    }
+
+    public void setPaymentAmount(BigDecimal paymentAmount) {
+        this.paymentAmount = paymentAmount;
     }
 
     public String getDescription() {
