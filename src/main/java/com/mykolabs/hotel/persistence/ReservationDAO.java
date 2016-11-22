@@ -77,12 +77,15 @@ public class ReservationDAO {
                     Customer customer = customerDAO.getCustomer(resultSet.getInt("CUSTOMER_ID"));
                     RoomDAO roomDAO = new RoomDAO();
                     Room room = roomDAO.getRoom(resultSet.getInt("ROOM_NUMBER"));
-                    EmployeeDAO employeeDAO = new EmployeeDAO();
-                    Employee employee = employeeDAO.getEmployee(resultSet.getInt("EMPLOYEE_ID"));
+                    
+                    // This logic needs to be revised. Jersey returns the whole Employee obj, which
+                    // exposes Password/Token
+                    //EmployeeDAO employeeDAO = new EmployeeDAO();
+                    //Employee employee = employeeDAO.getEmployee(resultSet.getInt("EMPLOYEE_ID"));
                             
                     reservationsData.setCustomerId(customer);
                     reservationsData.setRoomNumber(room);
-                    reservationsData.setEmployeeId(employee);
+                    //reservationsData.setEmployeeId(employee);
 
                     rows.add(reservationsData);
                 }
@@ -127,12 +130,14 @@ public class ReservationDAO {
                     Customer customer = customerDAO.getCustomer(resultSet.getInt("CUSTOMER_ID"));
                     RoomDAO roomDAO = new RoomDAO();
                     Room room = roomDAO.getRoom(resultSet.getInt("ROOM_NUMBER"));
-                    EmployeeDAO employeeDAO = new EmployeeDAO();
-                    Employee employee = employeeDAO.getEmployee(resultSet.getInt("EMPLOYEE_ID"));
+                    
+                    //EmployeeDAO employeeDAO = new EmployeeDAO();
+                    //Employee employee = employeeDAO.getEmployee(resultSet.getInt("EMPLOYEE_ID"));
                             
                     reservationData.setCustomerId(customer);
                     reservationData.setRoomNumber(room);
-                    reservationData.setEmployeeId(employee);
+                    
+                    //reservationData.setEmployeeId(employee);
 
                 }
             }

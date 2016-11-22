@@ -5,6 +5,7 @@
  */
 package com.mykolabs.hotel.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -106,6 +107,7 @@ public class Employee implements Serializable {
         this.roles = roles;
     }
 
+    @JsonIgnore
     @XmlTransient
     public List<Reservation> getReservationList() {
         return reservationList;
@@ -139,5 +141,5 @@ public class Employee implements Serializable {
     public String toString() {
         return "com.mykolabs.hotel.beans.Employee[ employeeId=" + employeeId + " ]";
     }
-    
+
 }

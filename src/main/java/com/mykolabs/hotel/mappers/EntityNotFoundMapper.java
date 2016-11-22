@@ -1,7 +1,7 @@
 package com.mykolabs.hotel.mappers;
 
-import com.mykolabs.exceptions.EntityNotFoundException;
-import com.mykolabs.exceptions.GenericErrorMessage;
+import com.mykolabs.hotel.exceptions.EntityNotFoundException;
+import com.mykolabs.hotel.exceptions.GenericErrorMessage;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;

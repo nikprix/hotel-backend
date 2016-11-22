@@ -5,6 +5,7 @@
  */
 package com.mykolabs.hotel.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -58,6 +59,8 @@ public class Reservation implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date checkoutDate;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "reservationId")
+
+    @JsonIgnore
     private List<Payment> paymentList;
     @JoinColumn(name = "CUSTOMER_ID", referencedColumnName = "CUSTOMER_ID")
     @ManyToOne(optional = false)
@@ -163,5 +166,5 @@ public class Reservation implements Serializable {
     public String toString() {
         return "com.mykolabs.hotel.beans.Reservation[ reservationId=" + reservationId + " ]";
     }
-    
+
 }

@@ -9,20 +9,24 @@
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>javax.ws.rs.Application</param-name>
-            <param-value>com.mykolabs.resource.ApplicationConfig</param-value>
+            <param-value>com.mykolabs.hotel.resource.ApplicationConfig</param-value>
         </init-param>
         <!-- Register resources and providers under my.package. -->
         <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
-            <param-value>com.mykolabs.resource;com.mykolabs.authentication;com.mykolabs.mappers;</param-value>
+            <param-value>
+                com.mykolabs.hotel.resource;
+                com.mykolabs.hotel.authentication;
+                com.mykolabs.hotel.mappers;
+            </param-value>
         </init-param>
         <!-- Register my custom provider (not needed if it's in my.package) -->
         <init-param>
             <param-name>jersey.config.server.provider.classnames</param-name>
-            <param-value>com.mykolabs.authentication.AuthenticationFilter;
-                com.mykolabs.mappers.AuthenticationExceptionMapper;
-                com.mykolabs.mappers.GeneralExceptionMapper;
-                com.mykolabs.mappers.EntityNotFoundMapper;
+            <param-value>com.mykolabs.hotel.authentication.AuthenticationFilter;
+                com.mykolabs.hotel.mappers.AuthenticationExceptionMapper;
+                com.mykolabs.hotel.mappers.GeneralExceptionMapper;
+                com.mykolabs.hotel.mappers.EntityNotFoundMapper;
             </param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>

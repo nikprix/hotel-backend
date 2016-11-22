@@ -117,17 +117,17 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                     Employee employee = null;
                     try {
                         // retrieving user's profile from the DB
-                        EmployeeDAO userDAO = new EmployeeDAO();
-                        user = userDAO.getUser(username);
+                        EmployeeDAO employeeDAO = new EmployeeDAO();
+                        employee = employeeDAO.getEmployee(username);
                         // retrieving binded to the user token
-                        String retrievedToken = user.getToken();
-                        log.log(Level.INFO, "Extracted from DB: {0} : {1}", new Object[]{user.getUsername(), retrievedToken});
+                        String retrievedToken = employee.getToken();
+                        log.log(Level.INFO, "Extracted from DB: {0} : {1}", new Object[]{employee.getUsername(), retrievedToken});
                     } catch (EntityNotFoundException e) {
                         throw new com.mykolabs.hotel.exceptions.EntityNotFoundException("User not found " + username);
                     }
-                    if (user != null) {
-                        if (user.getId() == id && user.getRoles() != null
-                                && Arrays.asList(user.getRoles()).containsAll(Arrays.asList(roles))) {
+                    if (employee != null) {
+                        if (employee.getEmployeeId() == id && employee.getRoles() != null
+                                && Arrays.asList(employee.getRoles()).containsAll(Arrays.asList(roles))) {
                             // Token is valid
                             log.log(Level.INFO, "Authentication info is valid");
                             return;

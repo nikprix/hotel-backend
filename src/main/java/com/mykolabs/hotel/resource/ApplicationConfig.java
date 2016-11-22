@@ -1,9 +1,9 @@
 package com.mykolabs.hotel.resource;
 
-import com.mykolabs.authentication.AuthenticationFilter;
-import com.mykolabs.mappers.AuthenticationExceptionMapper;
-import com.mykolabs.mappers.EntityNotFoundMapper;
-import com.mykolabs.mappers.GeneralExceptionMapper;
+import com.mykolabs.hotel.authentication.AuthenticationFilter;
+import com.mykolabs.hotel.mappers.AuthenticationExceptionMapper;
+import com.mykolabs.hotel.mappers.EntityNotFoundMapper;
+import com.mykolabs.hotel.mappers.GeneralExceptionMapper;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Set;
@@ -42,7 +42,7 @@ public class ApplicationConfig extends ResourceConfig {
         register(EntityNotFoundMapper.class);
         register(AuthenticationEndpoint.class);
         register(AuthenticationEndpoint.class);
-        register(BooksResource.class);
+        register(ReservationsResource.class);
         register(CORS.class);
 
         // turn on Jackson

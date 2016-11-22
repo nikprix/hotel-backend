@@ -5,6 +5,7 @@
  */
 package com.mykolabs.hotel.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -66,8 +67,12 @@ public class Customer implements Serializable {
     @Column(name = "PHONE")
     private String phone;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+
+    @JsonIgnore
     private List<Payment> paymentList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+
+    @JsonIgnore
     private List<Reservation> reservationList;
 
     public Customer() {
@@ -175,5 +180,5 @@ public class Customer implements Serializable {
     public String toString() {
         return "com.mykolabs.hotel.beans.Customer[ customerId=" + customerId + " ]";
     }
-    
+
 }

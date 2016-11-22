@@ -1,12 +1,12 @@
 package com.mykolabs.hotel.resource;
 
-import com.mykolabs.exceptions.GenericErrorMessage;
-import com.mykolabs.authentication.PassGen;
-import com.mykolabs.authentication.Token;
-import com.mykolabs.beans.Users;
-import com.mykolabs.exceptions.AuthorizationException;
-import com.mykolabs.persistence.UserDAO;
-import com.mykolabs.utils.TokenUtil;
+import com.mykolabs.hotel.exceptions.GenericErrorMessage;
+import com.mykolabs.hotel.authentication.PassGen;
+import com.mykolabs.hotel.authentication.Token;
+import com.mykolabs.hotel.beans.Employee;
+import com.mykolabs.hotel.exceptions.AuthorizationException;
+import com.mykolabs.hotel.persistence.EmployeeDAO;
+import com.mykolabs.hotel.util.TokenUtil;
 import io.jsonwebtoken.impl.crypto.MacProvider;
 import java.security.Key;
 import java.sql.SQLException;
@@ -42,17 +42,17 @@ public class AuthenticationEndpoint {
     @POST
     @Produces("application/json")
     @Consumes("application/json")
-    public Response authenticateUser(Users user) throws Exception {
+    public Response authenticateEmployee(Employee employee) throws Exception {
 
         // extracting username/password from request's body
-        String username = user.getUsername();
-        String password = user.getPassword();
+        String username = employee.getUsername();
+        String password = employee.getPassword();
 
         log.log(Level.INFO, "Username: {0}", username);
         log.log(Level.INFO, "Password: {0}", password);
 
         // Authenticate the user using the credentials provided and retrieve authenticated user obj
-        Users authenticatedUser = authenticateUser(username, password);
+        Employee authenticatedUser = authenticateEmployee(username, password);
 
         // Issue a token for the user
         Date expiry = getExpiryDate(100);
@@ -60,10 +60,10 @@ public class AuthenticationEndpoint {
         // The issued token must be associated to a user
         // Return the issued token
         String jwtString = TokenUtil.getJWTString(authenticatedUser.getUsername(),
-                authenticatedUser.getId(), authenticatedUser.getRoles().split(","), 
+                authenticatedUser.getEmployeeId(), authenticatedUser.getRoles().split(","), 
                 expiry, key);
 
-        Token token = new com.mykolabs.authentication.Token();
+        Token token = new com.mykolabs.hotel.authentication.Token();
 
         token.setAuthToken(jwtString);
         token.setExpires(expiry);
@@ -83,15 +83,15 @@ public class AuthenticationEndpoint {
      * @param password
      * @throws Exception
      */
-    private Users authenticateUser(String username, String password) throws Exception {
+    private Employee authenticateEmployee(String username, String password) throws Exception {
 
-        UserDAO userDAO = new UserDAO();
-        Users user;
+        EmployeeDAO employeeDAO = new EmployeeDAO();
+        Employee empoyee;
         
         // retrieve user's detaiuls from the DB
         try{
-         user = userDAO.getUser(username);
-         log.log(Level.INFO, "Retrieved user id: {0}", user.getId());
+         empoyee = employeeDAO.getEmployee(username);
+         log.log(Level.INFO, "Retrieved employee id: {0}", empoyee.getEmployeeId());
         } catch (Exception ex){
              // validating if valid username was provided
              ex.printStackTrace();
@@ -99,15 +99,15 @@ public class AuthenticationEndpoint {
         }
         
         // validating if valid username was provided
-        if(user.getId() == null){
+        if(empoyee.getEmployeeId() == null){
             throw new AuthorizationException("Invalid username provided!");
         }
          
         // validating provided password againt stored value and throwing exception if they don't match
-        if (!PassGen.check(password, user.getPassword())) {
+        if (!PassGen.check(password, empoyee.getPassword())) {
             throw new AuthorizationException("Invalid password provided!");
         }
-        return user;
+        return empoyee;
     }
 
     /**

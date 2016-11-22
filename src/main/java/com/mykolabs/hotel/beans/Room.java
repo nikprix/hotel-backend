@@ -5,6 +5,7 @@
  */
 package com.mykolabs.hotel.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
@@ -55,6 +56,8 @@ public class Room implements Serializable {
     @Column(name = "DESCRIPTION")
     private String description;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "roomNumber")
+
+    @JsonIgnore
     private List<Reservation> reservationList;
 
     public Room() {
@@ -129,5 +132,5 @@ public class Room implements Serializable {
     public String toString() {
         return "com.mykolabs.hotel.beans.Room[ roomNumber=" + roomNumber + " ]";
     }
-    
+
 }

@@ -1,6 +1,6 @@
 package com.mykolabs.hotel.util;
 
-import com.mykolabs.persistence.UserDAO;
+import com.mykolabs.hotel.persistence.EmployeeDAO;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
@@ -32,6 +32,17 @@ public class TokenUtil {
 
     private static final Logger log = Logger.getLogger(TokenUtil.class.getName());
 
+    /**
+     * Generates JWT and returns as String.
+     *
+     * @param username
+     * @param id
+     * @param roles
+     * @param expires
+     * @param apiKey
+     * @return
+     * @throws Exception
+     */
     public static String getJWTString(String username, int id, String[] roles, Date expires, SecretKey apiKey) throws Exception {
 
         log.log(Level.INFO, "Injected secret key: {0}", Base64.getEncoder().encodeToString(apiKey.getEncoded()));
@@ -73,9 +84,9 @@ public class TokenUtil {
         String jwtString = builder.compact();
 
         //Persist token to the DB
-        UserDAO userDAO = new UserDAO();
+        EmployeeDAO employeeDAO = new EmployeeDAO();
         try {
-            userDAO.setToken(username, jwtString);
+            employeeDAO.setToken(username, jwtString);
         } catch (SQLException ex) {
             throw new Exception("Error while saving token into the DB. See server logs for details.");
         }
@@ -84,6 +95,13 @@ public class TokenUtil {
         return jwtString;
     }
 
+    /**
+     * Validates provided by client token.
+     *
+     * @param token
+     * @param key
+     * @return
+     */
     public static boolean isValid(String token, Key key) {
         try {
             log.log(Level.INFO, "Secret KEY passed to the validation: {0}", Base64.getEncoder().encodeToString(key.getEncoded()));
@@ -95,6 +113,13 @@ public class TokenUtil {
         }
     }
 
+    /**
+     * Returns Name from token's claim.
+     *
+     * @param jwsToken
+     * @param key
+     * @return
+     */
     public static String getName(String jwsToken, Key key) {
         if (isValid(jwsToken, key)) {
             Jws<Claims> claimsJws = Jwts.parser().setSigningKey(key).parseClaimsJws(jwsToken);
@@ -103,6 +128,13 @@ public class TokenUtil {
         return null;
     }
 
+    /**
+     * Returns roles from Token's claim.
+     *
+     * @param jwsToken
+     * @param key
+     * @return
+     */
     public static String[] getRoles(String jwsToken, Key key) {
         if (isValid(jwsToken, key)) {
             Jws<Claims> claimsJws = Jwts.parser().setSigningKey(key).parseClaimsJws(jwsToken);
@@ -111,6 +143,13 @@ public class TokenUtil {
         return new String[]{};
     }
 
+    /**
+     * Returns id from token's claim.
+     *
+     * @param jwsToken
+     * @param key
+     * @return
+     */
     public static int getId(String jwsToken, Key key) {
         if (isValid(jwsToken, key)) {
             Jws<Claims> claimsJws = Jwts.parser().setSigningKey(key).parseClaimsJws(jwsToken);
@@ -119,6 +158,13 @@ public class TokenUtil {
         return -1;
     }
 
+    /**
+     * Returns expiration date from token's claim.
+     *
+     * @param jwsToken
+     * @param key
+     * @return
+     */
     public static Date getExpiryDate(String jwsToken, Key key) {
         if (isValid(jwsToken, key)) {
             Jws<Claims> claimsJws = Jwts.parser().setSigningKey(key).parseClaimsJws(jwsToken);
