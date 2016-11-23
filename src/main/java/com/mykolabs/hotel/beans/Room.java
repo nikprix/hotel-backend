@@ -55,10 +55,10 @@ public class Room implements Serializable {
     @Size(max = 65535)
     @Column(name = "DESCRIPTION")
     private String description;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "roomNumber")
-
-    @JsonIgnore
-    private List<Reservation> reservationList;
+    
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "roomNumber")
+//    @JsonIgnore
+//    private List<Reservation> reservationList;
 
     public Room() {
     }
@@ -99,14 +99,14 @@ public class Room implements Serializable {
         this.description = description;
     }
 
-    @XmlTransient
-    public List<Reservation> getReservationList() {
-        return reservationList;
-    }
-
-    public void setReservationList(List<Reservation> reservationList) {
-        this.reservationList = reservationList;
-    }
+//    @XmlTransient
+//    public List<Reservation> getReservationList() {
+//        return reservationList;
+//    }
+//
+//    public void setReservationList(List<Reservation> reservationList) {
+//        this.reservationList = reservationList;
+//    }
 
     @Override
     public int hashCode() {

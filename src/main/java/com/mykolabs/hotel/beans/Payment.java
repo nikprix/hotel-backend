@@ -60,12 +60,21 @@ public class Payment implements Serializable {
     @Size(max = 65535)
     @Column(name = "DESCRIPTION")
     private String description;
-    @JoinColumn(name = "CUSTOMER_ID", referencedColumnName = "CUSTOMER_ID")
-    @ManyToOne(optional = false)
-    private Customer customerId;
-    @JoinColumn(name = "RESERVATION_ID", referencedColumnName = "RESERVATION_ID")
-    @ManyToOne(optional = false)
-    private Reservation reservationId;
+
+//    @JoinColumn(name = "CUSTOMER_ID", referencedColumnName = "CUSTOMER_ID")
+//    @ManyToOne(optional = false)
+//    private Customer customerId;
+//    @JoinColumn(name = "RESERVATION_ID", referencedColumnName = "RESERVATION_ID")
+//    @ManyToOne(optional = false)
+//    private Reservation reservationId;
+    
+    @Basic(optional = false)
+    @Column(name = "CUSTOMER_ID")
+    private Integer customerId;
+
+    @Basic(optional = false)
+    @Column(name = "RESERVATION_ID")
+    private Integer reservationId;
 
     public Payment() {
     }
@@ -122,21 +131,38 @@ public class Payment implements Serializable {
         this.description = description;
     }
 
-    public Customer getCustomerId() {
+//    public Customer getCustomerId() {
+//        return customerId;
+//    }
+//
+//    public void setCustomerId(Customer customerId) {
+//        this.customerId = customerId;
+//    }
+//
+//    public Reservation getReservationId() {
+//        return reservationId;
+//    }
+//
+//    public void setReservationId(Reservation reservationId) {
+//        this.reservationId = reservationId;
+//    }
+
+    public Integer getCustomerId() {
         return customerId;
     }
 
-    public void setCustomerId(Customer customerId) {
+    public void setCustomerId(Integer customerId) {
         this.customerId = customerId;
     }
 
-    public Reservation getReservationId() {
+    public Integer getReservationId() {
         return reservationId;
     }
 
-    public void setReservationId(Reservation reservationId) {
+    public void setReservationId(Integer reservationId) {
         this.reservationId = reservationId;
     }
+    
 
     @Override
     public int hashCode() {
@@ -162,5 +188,5 @@ public class Payment implements Serializable {
     public String toString() {
         return "com.mykolabs.hotel.beans.Payment[ paymentId=" + paymentId + " ]";
     }
-    
+
 }

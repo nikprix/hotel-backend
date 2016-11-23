@@ -5,6 +5,7 @@ import com.mykolabs.hotel.beans.Employee;
 import com.mykolabs.hotel.beans.Reservation;
 import com.mykolabs.hotel.beans.Room;
 import com.mykolabs.hotel.util.ConnectionHelper;
+import com.mysql.jdbc.Statement;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,7 +22,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class retrieves and persists Reservation related data into corresponding database.
+ * This class retrieves and persists Reservation related data into corresponding
+ * database.
+ *
  * @author nikprixmar
  */
 public class ReservationDAO {
@@ -68,24 +71,25 @@ public class ReservationDAO {
                 while (resultSet.next()) {
 
                     Reservation reservationsData = new Reservation();
-                    
+
                     reservationsData.setReservationId(resultSet.getInt("RESERVATION_ID"));
                     reservationsData.setCheckinDate(resultSet.getDate("CHECKIN_DATE"));
                     reservationsData.setCheckoutDate(resultSet.getDate("CHECKOUT_DATE"));
-                    
-                    CustomerDAO customerDAO = new CustomerDAO();
-                    Customer customer = customerDAO.getCustomer(resultSet.getInt("CUSTOMER_ID"));
-                    RoomDAO roomDAO = new RoomDAO();
-                    Room room = roomDAO.getRoom(resultSet.getInt("ROOM_NUMBER"));
-                    
+
+                    //CustomerDAO customerDAO = new CustomerDAO();
+                    //Customer customer = customerDAO.getCustomer(resultSet.getInt("CUSTOMER_ID"));
+                    //RoomDAO roomDAO = new RoomDAO();
+                    //Room room = roomDAO.getRoom(resultSet.getInt("ROOM_NUMBER"));
                     // This logic needs to be revised. Jersey returns the whole Employee obj, which
                     // exposes Password/Token
                     //EmployeeDAO employeeDAO = new EmployeeDAO();
                     //Employee employee = employeeDAO.getEmployee(resultSet.getInt("EMPLOYEE_ID"));
-                            
-                    reservationsData.setCustomerId(customer);
-                    reservationsData.setRoomNumber(room);
+                    //reservationsData.setCustomerId(customer);
+                    //reservationsData.setRoomNumber(room);
                     //reservationsData.setEmployeeId(employee);
+                    reservationsData.setCustomerId(resultSet.getInt("CUSTOMER_ID"));
+                    reservationsData.setRoomNumberId(resultSet.getInt("ROOM_NUMBER"));
+                    reservationsData.setEmployteeId(resultSet.getInt("EMPLOYEE_ID"));
 
                     rows.add(reservationsData);
                 }
@@ -106,7 +110,7 @@ public class ReservationDAO {
         Properties props = ConnectionHelper.getProperties();
         Reservation reservationData = new Reservation();
 
-        String selectQuery = "SELECT RESERVATION_ID, CHECKIN_DATE, CHECKOUT_DATE, CUSTOMER_ID, ROOM_NUMBER, EMPLOYEE_ID "                 + "FROM RESERVATION "
+        String selectQuery = "SELECT RESERVATION_ID, CHECKIN_DATE, CHECKOUT_DATE, CUSTOMER_ID, ROOM_NUMBER, EMPLOYEE_ID " + "FROM RESERVATION "
                 + "WHERE RESERVATION_ID = ?";
 
         // Using Java 1.7 try with resources
@@ -125,19 +129,19 @@ public class ReservationDAO {
                     reservationData.setReservationId(resultSet.getInt("RESERVATION_ID"));
                     reservationData.setCheckinDate(resultSet.getDate("CHECKIN_DATE"));
                     reservationData.setCheckoutDate(resultSet.getDate("CHECKOUT_DATE"));
-                    
-                    CustomerDAO customerDAO = new CustomerDAO();
-                    Customer customer = customerDAO.getCustomer(resultSet.getInt("CUSTOMER_ID"));
-                    RoomDAO roomDAO = new RoomDAO();
-                    Room room = roomDAO.getRoom(resultSet.getInt("ROOM_NUMBER"));
-                    
+
+                    //CustomerDAO customerDAO = new CustomerDAO();
+                    //Customer customer = customerDAO.getCustomer(resultSet.getInt("CUSTOMER_ID"));
+                    //RoomDAO roomDAO = new RoomDAO();
+                    //Room room = roomDAO.getRoom(resultSet.getInt("ROOM_NUMBER"));
                     //EmployeeDAO employeeDAO = new EmployeeDAO();
                     //Employee employee = employeeDAO.getEmployee(resultSet.getInt("EMPLOYEE_ID"));
-                            
-                    reservationData.setCustomerId(customer);
-                    reservationData.setRoomNumber(room);
-                    
+                    //reservationData.setCustomerId(customer);
+                    //reservationData.setRoomNumber(room);
                     //reservationData.setEmployeeId(employee);
+                    reservationData.setCustomerId(resultSet.getInt("CUSTOMER_ID"));
+                    reservationData.setRoomNumberId(resultSet.getInt("ROOM_NUMBER"));
+                    reservationData.setEmployteeId(resultSet.getInt("EMPLOYEE_ID"));
 
                 }
             }
@@ -154,7 +158,7 @@ public class ReservationDAO {
      * @throws java.sql.SQLException
      */
     public int updateReservation(Reservation reservation) throws SQLException {
-        int result = 0;
+        int result;
 
         String updateQuery = "UPDATE RESERVATION "
                 + "SET RESERVATION_ID=?, CHECKIN_DATE=?, CHECKOUT_DATE=?, "
@@ -168,18 +172,23 @@ public class ReservationDAO {
         try (Connection connection = ConnectionHelper.getConnection();
                 // Using PreparedStatements to guard against SQL Injection
                 PreparedStatement pStatement = connection.prepareStatement(updateQuery);) {
-            
+
             pStatement.setInt(1, reservation.getReservationId());
             pStatement.setDate(2, convertToSqlDate(reservation.getCheckinDate()));
             pStatement.setDate(3, convertToSqlDate(reservation.getCheckoutDate()));
-            pStatement.setInt(4, reservation.getCustomerId().getCustomerId());
-            pStatement.setInt(5, reservation.getRoomNumber().getRoomNumber());
-            pStatement.setInt(6, reservation.getEmployeeId().getEmployeeId());
-            
+            //pStatement.setInt(4, reservation.getCustomerId().getCustomerId());
+            //pStatement.setInt(5, reservation.getRoomNumber().getRoomNumber());
+            //pStatement.setInt(6, reservation.getEmployeeId().getEmployeeId());
+
+            pStatement.setInt(4, reservation.getCustomerId());
+            pStatement.setInt(5, reservation.getRoomNumberId());
+            pStatement.setInt(6, reservation.getEmployteeId());
+
             pStatement.setInt(7, reservation.getReservationId());
 
             result = pStatement.executeUpdate();
         }
+        log.log(Level.INFO, "Update status: {0}", result);
         log.log(Level.INFO, "Updated reservation with reservationID: {0}", reservation.getReservationId());
         return result;
     }
@@ -205,16 +214,32 @@ public class ReservationDAO {
         // the ResultSet will all be closed.
         try (Connection connection = ConnectionHelper.getConnection();
                 // Using PreparedStatements to guard against SQL Injection
-                PreparedStatement pStatement = connection.prepareStatement(createQuery);) {
+                PreparedStatement pStatement = connection.prepareStatement(createQuery, Statement.RETURN_GENERATED_KEYS);) {
 
             pStatement.setDate(1, convertToSqlDate(reservation.getCheckinDate()));
             pStatement.setDate(2, convertToSqlDate(reservation.getCheckoutDate()));
-            pStatement.setInt(3, reservation.getCustomerId().getCustomerId());
-            pStatement.setInt(4, reservation.getRoomNumber().getRoomNumber());
-            pStatement.setInt(5, reservation.getEmployeeId().getEmployeeId());
+            //pStatement.setInt(3, reservation.getCustomerId().getCustomerId());
+            //pStatement.setInt(4, reservation.getRoomNumber().getRoomNumber());
+            //pStatement.setInt(5, reservation.getEmployeeId().getEmployeeId());
+
+            pStatement.setInt(3, reservation.getCustomerId());
+            pStatement.setInt(4, reservation.getRoomNumberId());
+            pStatement.setInt(5, reservation.getEmployteeId());
 
             result = pStatement.executeUpdate();
+            
+            try (ResultSet generatedKeys = pStatement.getGeneratedKeys()) {
+            if (generatedKeys.next()) {
+                reservation.setReservationId(generatedKeys.getInt(1));
+            }
+            else {
+                throw new SQLException("Creating reservation failed, no ID obtained.");
+            }
         }
+            
+            
+        }
+        log.log(Level.INFO, "Create status: {0}", result);
         log.log(Level.INFO, "Created reservation with reservationID: {0}", reservation.getReservationId());
         return result;
     }

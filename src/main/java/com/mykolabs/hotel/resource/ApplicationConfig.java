@@ -34,7 +34,7 @@ public class ApplicationConfig extends ResourceConfig {
         /* REGISTERING Resources and Providers */
         // also, init-params needs to be added to the web.xml file
         //registering using ResourceConfig (this class extends ResourceConfig) 
-        packages("com.mykolabs.authentication;com.mykolabs.mappers;com.mykolabs.resource;");
+        packages("com.mykolabs.hotel.authentication;com.mykolabs.hotel.mappers;com.mykolabs.hotel.resource;");
         
         register(AuthenticationFilter.class);
         register(AuthenticationExceptionMapper.class);
@@ -43,6 +43,7 @@ public class ApplicationConfig extends ResourceConfig {
         register(AuthenticationEndpoint.class);
         register(AuthenticationEndpoint.class);
         register(ReservationsResource.class);
+        register(RoomResource.class);
         register(CORS.class);
 
         // turn on Jackson

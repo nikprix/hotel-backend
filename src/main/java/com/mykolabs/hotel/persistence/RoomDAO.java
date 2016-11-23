@@ -6,6 +6,7 @@ import com.mykolabs.hotel.beans.Payment;
 import com.mykolabs.hotel.beans.Reservation;
 import com.mykolabs.hotel.beans.Room;
 import com.mykolabs.hotel.util.ConnectionHelper;
+import com.mysql.jdbc.Statement;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Connection;
@@ -72,12 +73,12 @@ public class RoomDAO {
                 while (resultSet.next()) {
 
                     Room roomData = new Room();
-                    
+
                     roomData.setRoomNumber(resultSet.getInt("ROOM_NUMBER"));
                     roomData.setRoomPrice(resultSet.getBigDecimal("ROOM_PRICE"));
                     roomData.setRoomType(resultSet.getString("ROOM_TYPE"));
                     roomData.setDescription(resultSet.getString("DESCRIPTION"));
-                    
+
                     rows.add(roomData);
                 }
             }
@@ -148,12 +149,12 @@ public class RoomDAO {
         try (Connection connection = ConnectionHelper.getConnection();
                 // Using PreparedStatements to guard against SQL Injection
                 PreparedStatement pStatement = connection.prepareStatement(updateQuery);) {
-            
+
             pStatement.setInt(1, room.getRoomNumber());
             pStatement.setBigDecimal(2, room.getRoomPrice());
             pStatement.setString(3, room.getRoomType());
             pStatement.setString(4, room.getDescription());
-            
+
             pStatement.setInt(5, room.getRoomNumber());
 
             result = pStatement.executeUpdate();
@@ -182,13 +183,22 @@ public class RoomDAO {
         // the ResultSet will all be closed.
         try (Connection connection = ConnectionHelper.getConnection();
                 // Using PreparedStatements to guard against SQL Injection
-                PreparedStatement pStatement = connection.prepareStatement(createQuery);) {
-            
+                PreparedStatement pStatement = connection.prepareStatement(createQuery, Statement.RETURN_GENERATED_KEYS);) {
+
             pStatement.setBigDecimal(1, room.getRoomPrice());
             pStatement.setString(2, room.getRoomType());
             pStatement.setString(3, room.getDescription());
 
             result = pStatement.executeUpdate();
+
+            try (ResultSet generatedKeys = pStatement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    room.setRoomNumber(generatedKeys.getInt(1));
+                } else {
+                    throw new SQLException("Creating room failed, no ID obtained.");
+                }
+            }
+
         }
         log.log(Level.INFO, "Created room with roomID: {0}", result);
         return result;

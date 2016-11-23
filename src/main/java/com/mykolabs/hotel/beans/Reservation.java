@@ -58,19 +58,30 @@ public class Reservation implements Serializable {
     @Column(name = "CHECKOUT_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     private Date checkoutDate;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "reservationId")
 
-    @JsonIgnore
-    private List<Payment> paymentList;
-    @JoinColumn(name = "CUSTOMER_ID", referencedColumnName = "CUSTOMER_ID")
-    @ManyToOne(optional = false)
-    private Customer customerId;
-    @JoinColumn(name = "ROOM_NUMBER", referencedColumnName = "ROOM_NUMBER")
-    @ManyToOne(optional = false)
-    private Room roomNumber;
-    @JoinColumn(name = "EMPLOYEE_ID", referencedColumnName = "EMPLOYEE_ID")
-    @ManyToOne(optional = false)
-    private Employee employeeId;
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "reservationId")
+//    @JsonIgnore
+//    private List<Payment> paymentList;
+//    @JoinColumn(name = "CUSTOMER_ID", referencedColumnName = "CUSTOMER_ID")
+//    @ManyToOne(optional = false)
+//    private Customer customerId;
+//    @JoinColumn(name = "ROOM_NUMBER", referencedColumnName = "ROOM_NUMBER")
+//    @ManyToOne(optional = false)
+//    private Room roomNumber;
+//    @JoinColumn(name = "EMPLOYEE_ID", referencedColumnName = "EMPLOYEE_ID")
+//    @ManyToOne(optional = false)
+//    private Employee employeeId;
+    @Basic(optional = false)
+    @Column(name = "CUSTOMER_ID")
+    private Integer customerId;
+
+    @Basic(optional = false)
+    @Column(name = "ROOM_NUMBER")
+    private Integer roomNumberId;
+
+    @Basic(optional = false)
+    @Column(name = "EMPLOYEE_ID")
+    private Integer employteeId;
 
     public Reservation() {
     }
@@ -109,39 +120,63 @@ public class Reservation implements Serializable {
         this.checkoutDate = checkoutDate;
     }
 
-    @XmlTransient
-    public List<Payment> getPaymentList() {
-        return paymentList;
-    }
+//    @XmlTransient
+//    public List<Payment> getPaymentList() {
+//        return paymentList;
+//    }
+//
+//    public void setPaymentList(List<Payment> paymentList) {
+//        this.paymentList = paymentList;
+//    }
+//
+//    public Customer getCustomerId() {
+//        return customerId;
+//    }
+//
+//    public void setCustomerId(Customer customerId) {
+//        this.customerId = customerId;
+//    }
+//
+//    public Room getRoomNumber() {
+//        return roomNumber;
+//    }
+//
+//    public void setRoomNumber(Room roomNumber) {
+//        this.roomNumber = roomNumber;
+//    }
+//
+//    public Employee getEmployeeId() {
+//        return employeeId;
+//    }
+//
+//    public void setEmployeeId(Employee employeeId) {
+//        this.employeeId = employeeId;
+//    }
 
-    public void setPaymentList(List<Payment> paymentList) {
-        this.paymentList = paymentList;
-    }
-
-    public Customer getCustomerId() {
+    public Integer getCustomerId() {
         return customerId;
     }
 
-    public void setCustomerId(Customer customerId) {
+    public void setCustomerId(Integer customerId) {
         this.customerId = customerId;
     }
 
-    public Room getRoomNumber() {
-        return roomNumber;
+    public Integer getRoomNumberId() {
+        return roomNumberId;
     }
 
-    public void setRoomNumber(Room roomNumber) {
-        this.roomNumber = roomNumber;
+    public void setRoomNumberId(Integer roomNumberId) {
+        this.roomNumberId = roomNumberId;
     }
 
-    public Employee getEmployeeId() {
-        return employeeId;
+    public Integer getEmployteeId() {
+        return employteeId;
     }
 
-    public void setEmployeeId(Employee employeeId) {
-        this.employeeId = employeeId;
+    public void setEmployteeId(Integer employteeId) {
+        this.employteeId = employteeId;
     }
-
+    
     @Override
     public int hashCode() {
         int hash = 0;

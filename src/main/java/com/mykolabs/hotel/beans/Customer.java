@@ -66,14 +66,15 @@ public class Customer implements Serializable {
     @Size(max = 25)
     @Column(name = "PHONE")
     private String phone;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
-
-    @JsonIgnore
-    private List<Payment> paymentList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
-
-    @JsonIgnore
-    private List<Reservation> reservationList;
+    
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+//    @JsonIgnore
+//    private List<Payment> paymentList;
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+//    @JsonIgnore
+//    private List<Reservation> reservationList;
+    
+    
 
     public Customer() {
     }
@@ -138,23 +139,23 @@ public class Customer implements Serializable {
         this.phone = phone;
     }
 
-    @XmlTransient
-    public List<Payment> getPaymentList() {
-        return paymentList;
-    }
-
-    public void setPaymentList(List<Payment> paymentList) {
-        this.paymentList = paymentList;
-    }
-
-    @XmlTransient
-    public List<Reservation> getReservationList() {
-        return reservationList;
-    }
-
-    public void setReservationList(List<Reservation> reservationList) {
-        this.reservationList = reservationList;
-    }
+//    @XmlTransient
+//    public List<Payment> getPaymentList() {
+//        return paymentList;
+//    }
+//
+//    public void setPaymentList(List<Payment> paymentList) {
+//        this.paymentList = paymentList;
+//    }
+//
+//    @XmlTransient
+//    public List<Reservation> getReservationList() {
+//        return reservationList;
+//    }
+//
+//    public void setReservationList(List<Reservation> reservationList) {
+//        this.reservationList = reservationList;
+//    }
 
     @Override
     public int hashCode() {

@@ -81,14 +81,18 @@ public class PaymentDAO {
                     paymentsData.setPaymentAmount(resultSet.getBigDecimal("PAYMENT_AMOUNT"));
                     paymentsData.setDescription(resultSet.getString("DESCRIPTION"));
 
-                    CustomerDAO customerDAO = new CustomerDAO();
-                    Customer customer = customerDAO.getCustomer(resultSet.getInt("CUSTOMER_ID"));
+//                    CustomerDAO customerDAO = new CustomerDAO();
+//                    Customer customer = customerDAO.getCustomer(resultSet.getInt("CUSTOMER_ID"));
+//
+//                    ReservationDAO reservationDAO = new ReservationDAO();
+//                    Reservation reservation = reservationDAO.getReservation(resultSet.getInt("RESERVATION_ID"));
+//
+//                    paymentsData.setCustomerId(customer);
+//                    paymentsData.setReservationId(reservation);
 
-                    ReservationDAO reservationDAO = new ReservationDAO();
-                    Reservation reservation = reservationDAO.getReservation(resultSet.getInt("RESERVATION_ID"));
+                    paymentsData.setCustomerId(resultSet.getInt("CUSTOMER_ID"));
+                    paymentsData.setReservationId(resultSet.getInt("RESERVATION_ID"));
 
-                    paymentsData.setCustomerId(customer);
-                    paymentsData.setReservationId(reservation);
 
                     rows.add(paymentsData);
                 }
@@ -135,14 +139,17 @@ public class PaymentDAO {
                     paymentData.setPaymentAmount(resultSet.getBigDecimal("PAYMENT_AMOUNT"));
                     paymentData.setDescription(resultSet.getString("DESCRIPTION"));
 
-                    CustomerDAO customerDAO = new CustomerDAO();
-                    Customer customer = customerDAO.getCustomer(resultSet.getInt("CUSTOMER_ID"));
+//                    CustomerDAO customerDAO = new CustomerDAO();
+//                    Customer customer = customerDAO.getCustomer(resultSet.getInt("CUSTOMER_ID"));
+//
+//                    ReservationDAO reservationDAO = new ReservationDAO();
+//                    Reservation reservation = reservationDAO.getReservation(resultSet.getInt("RESERVATION_ID"));
+//
+//                    paymentData.setCustomerId(customer);
+//                    paymentData.setReservationId(reservation);
 
-                    ReservationDAO reservationDAO = new ReservationDAO();
-                    Reservation reservation = reservationDAO.getReservation(resultSet.getInt("RESERVATION_ID"));
-
-                    paymentData.setCustomerId(customer);
-                    paymentData.setReservationId(reservation);
+                    paymentData.setCustomerId(resultSet.getInt("CUSTOMER_ID"));
+                    paymentData.setReservationId(resultSet.getInt("RESERVATION_ID"));
 
                 }
             }
@@ -181,8 +188,11 @@ public class PaymentDAO {
             pStatement.setString(4, payment.getCardExpiration());
             pStatement.setBigDecimal(5, payment.getPaymentAmount());
             pStatement.setString(6, payment.getDescription());
-            pStatement.setInt(7, payment.getCustomerId().getCustomerId());
-            pStatement.setInt(8, payment.getReservationId().getReservationId());
+//            pStatement.setInt(7, payment.getCustomerId().getCustomerId());
+//            pStatement.setInt(8, payment.getReservationId().getReservationId());
+
+            pStatement.setInt(7, payment.getCustomerId());
+            pStatement.setInt(8, payment.getReservationId());
             
             pStatement.setInt(9, payment.getPaymentId());
 
@@ -220,8 +230,11 @@ public class PaymentDAO {
             pStatement.setString(3, payment.getCardExpiration());
             pStatement.setBigDecimal(4, payment.getPaymentAmount());
             pStatement.setString(5, payment.getDescription());
-            pStatement.setInt(6, payment.getCustomerId().getCustomerId());
-            pStatement.setInt(7, payment.getReservationId().getReservationId());
+//            pStatement.setInt(6, payment.getCustomerId().getCustomerId());
+//            pStatement.setInt(7, payment.getReservationId().getReservationId());
+
+            pStatement.setInt(6, payment.getCustomerId());
+            pStatement.setInt(7, payment.getReservationId());
 
             result = pStatement.executeUpdate();
         }

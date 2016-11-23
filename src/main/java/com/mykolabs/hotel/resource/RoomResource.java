@@ -23,8 +23,11 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import com.google.common.collect.Sets;
 import com.mykolabs.hotel.authentication.AuthenticationFilter;
+import com.mykolabs.hotel.beans.Room;
+import com.mykolabs.hotel.beans.RoomList;
 import com.mykolabs.hotel.mappers.AuthenticationExceptionMapper;
 import com.mykolabs.hotel.mappers.GeneralExceptionMapper;
+import com.mykolabs.hotel.persistence.RoomDAO;
 
 /**
  * REST Web Service to manage hotel reservations (Jersey / ).
@@ -35,13 +38,13 @@ import com.mykolabs.hotel.mappers.GeneralExceptionMapper;
  *
  * @author nikprixmar
  */
-@Path("reservations")
-public class ReservationsResource extends ResourceConfig {
+@Path("rooms")
+public class RoomResource extends ResourceConfig {
 
     /**
      * Creates a new instance of BooksResource
      */
-    public ReservationsResource() {
+    public RoomResource() {
 
         /* REGISTERING Resources and Providers */
         // also, init-params needs to be added to the web.xml file
@@ -53,7 +56,7 @@ public class ReservationsResource extends ResourceConfig {
     }
 
     /**
-     * Retrieves ALL reservations from the DB. Future enhancement - add limits by
+     * Retrieves ALL rooms from the DB. Future enhancement - add limits by
      * DateOfEntry - start / end date.
      *
      * @return an instance of java.lang.String
@@ -62,18 +65,18 @@ public class ReservationsResource extends ResourceConfig {
     @GET
     @Secured
     @Produces(MediaType.APPLICATION_JSON)
-    public ReservationList getAllReservations() throws SQLException {
+    public RoomList getAllRooms() throws SQLException {
 
-        ReservationList reservationList = new ReservationList();
-        ReservationDAO reservationDAO = new ReservationDAO();
+        RoomList roomList = new RoomList();
+        RoomDAO roomDAO = new RoomDAO();
         // retrieving reservations from the DB
-        reservationList.setReservationList(reservationDAO.getAllReservations(0, 100, true));
+        roomList.setRoomList(roomDAO.getAllRooms(0, 100, true));
 
-        return reservationList;
+        return roomList;
     }
 
     /**
-     * Retrieves single reservation from the DB. 
+     * Retrieves single room from the DB by provided ID. 
      *
      * @param id
      * @return an instance of java.lang.String
@@ -83,61 +86,60 @@ public class ReservationsResource extends ResourceConfig {
     @Secured
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getReservation(@PathParam("id") int id) throws SQLException {
+    public Response getRoom(@PathParam("id") int id) throws SQLException {
 
         if (id < 0) {
             return Response.noContent().build();
         }
 
-        ReservationDAO reservationDAO = new ReservationDAO();
-        // retrieving reservation from the DB
-        Reservation singleReservationFromDB = reservationDAO.getReservation(id);
+        RoomDAO roomDAO = new RoomDAO();
+        // retrieving room from the DB
+        Room singleRoomFromDB = roomDAO.getRoom(id);
 
-        GenericEntity<Reservation> entity = new GenericEntity<>(singleReservationFromDB, Reservation.class);
+        GenericEntity<Room> entity = new GenericEntity<>(singleRoomFromDB, Room.class);
 
         return Response.ok().entity(entity).build();
     }
 
     /**
-     * PUT method for updating an instance of ReservationsResource
+     * PUT method for updating an instance of Room
      *
-     * @param reservation
+     * @param room
      * @return
      * @throws java.sql.SQLException
-     * @throws java.net.URISyntaxException
      */
     @PUT
     @Secured
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/update")
-    public Response editReservation(final Reservation reservation) throws SQLException {
+    public Response editRoom(final Room room) throws SQLException {
 
-        if (!Validator.isReservationExists(reservation)) {
-            return Response.status(400).entity("{\"error\": \"Please add reservation details!\"}").build();
+        if (!Validator.isRoomExists(room)) {
+            return Response.status(400).entity("{\"error\": \"Please add room details!\"}").build();
         }
 
-        if (!Validator.isReservationValid(reservation)) {
-            return Response.status(400).entity("{\"error\": \"Some reservation details are missing!\"}").build();
+        if (!Validator.isRoomValid(room)) {
+            return Response.status(400).entity("{\"error\": \"Some room details are missing!\"}").build();
         }
 
-        ReservationDAO reservationDAO = new ReservationDAO();
+        RoomDAO roomDAO = new RoomDAO();
 
-        int reservationStatus = 0;
+        int roomStatus = 0;
 
-        reservationStatus = reservationDAO.updateReservation(reservation);
+        roomStatus = roomDAO.updateRoom(room);
 
-        if (reservationStatus != 1) {
-            return Response.status(400).entity("{\"error\":\"An error occured while updating reservation. Please try again\"}").build();
+        if (roomStatus != 1) {
+            return Response.status(400).entity("{\"error\":\"An error occured while updating room details. Please try again\"}").build();
         }
 
-        return Response.ok().entity(reservation).build();
+        return Response.ok().entity(room).build();
     }
 
     /**
-     * POST method for creating an instance of ReservationsResource
+     * POST method for creating an instance of Room
      *
-     * @param reservation
+     * @param room
      * @return
      * @throws java.net.URISyntaxException
      * @throws java.sql.SQLException
@@ -147,27 +149,27 @@ public class ReservationsResource extends ResourceConfig {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/create")
-    public Response addReservation(final Reservation reservation) throws URISyntaxException, SQLException, Exception {
+    public Response addRoom(final Room room) throws URISyntaxException, SQLException, Exception {
 
-        if (!Validator.isReservationExists(reservation)) {
-            return Response.status(400).entity("{\"error\": \"Please add reservations details!\"}").build();
+        if (!Validator.isRoomExists(room)) {
+            return Response.status(400).entity("{\"error\": \"Please add room details!\"}").build();
         }
 
-        if (!Validator.isReservationValid(reservation)) {
-            return Response.status(400).entity("{\"error\": \"Some reservation details are missing!\"}").build();
+        if (!Validator.isRoomValid(room)) {
+            return Response.status(400).entity("{\"error\": \"Some room details are missing!\"}").build();
         }
 
-        ReservationDAO reservationDAO = new ReservationDAO();
+        RoomDAO roomDAO = new RoomDAO();
 
-        int reservationStatus = 0;
+        int roomStatus = 0;
 
-        reservationStatus = reservationDAO.addReservation(reservation);
+        roomStatus = roomDAO.addRoom(room);
 
-        if (reservationStatus != 1) {
-            return Response.status(400).entity("{\"error\":\"An error occured while adding reservation. Please try again\"}").build();
+        if (roomStatus != 1) {
+            return Response.status(400).entity("{\"error\":\"An error occured while adding a room. Please try again\"}").build();
         }
 
-        return Response.created(new URI("reservations/" + reservation.getReservationId())).build();
+        return Response.created(new URI("rooms/" + room.getRoomNumber())).build();
     }
 
     @OPTIONS

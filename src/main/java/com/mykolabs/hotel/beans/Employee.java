@@ -57,8 +57,10 @@ public class Employee implements Serializable {
     @Size(max = 45)
     @Column(name = "ROLES")
     private String roles;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "employeeId")
-    private List<Reservation> reservationList;
+    
+    
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "employeeId")
+//    private List<Reservation> reservationList;
 
     public Employee() {
     }
@@ -107,15 +109,15 @@ public class Employee implements Serializable {
         this.roles = roles;
     }
 
-    @JsonIgnore
-    @XmlTransient
-    public List<Reservation> getReservationList() {
-        return reservationList;
-    }
-
-    public void setReservationList(List<Reservation> reservationList) {
-        this.reservationList = reservationList;
-    }
+//    @JsonIgnore
+//    @XmlTransient
+//    public List<Reservation> getReservationList() {
+//        return reservationList;
+//    }
+//
+//    public void setReservationList(List<Reservation> reservationList) {
+//        this.reservationList = reservationList;
+//    }
 
     @Override
     public int hashCode() {

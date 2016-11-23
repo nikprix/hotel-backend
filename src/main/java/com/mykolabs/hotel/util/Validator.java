@@ -65,8 +65,8 @@ public class Validator {
                 || reservation.getCheckinDate() == null
                 || reservation.getCheckoutDate() == null
                 || reservation.getCustomerId() == null
-                || reservation.getRoomNumber() == null
-                || reservation.getEmployeeId() == null);
+                || reservation.getRoomNumberId() == null
+                || reservation.getReservationId() == null);
     }
 
     /**
