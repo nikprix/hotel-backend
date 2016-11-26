@@ -5,6 +5,7 @@ import com.mykolabs.hotel.beans.Employee;
 import com.mykolabs.hotel.beans.Payment;
 import com.mykolabs.hotel.beans.Reservation;
 import com.mykolabs.hotel.beans.Room;
+import com.mykolabs.hotel.beans.RoomSearch;
 import com.mykolabs.hotel.util.ConnectionHelper;
 import com.mysql.jdbc.Statement;
 import java.math.BigDecimal;
@@ -16,6 +17,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -32,6 +34,8 @@ import java.util.regex.Pattern;
 public class RoomDAO {
 
     private static final Logger log = Logger.getLogger(RoomDAO.class.getName());
+    // very basic URL validation regex
+    public static final String URL_REGEX = "^((https?|ftp)://|(www|ftp)\\.){1}";
 
     public RoomDAO() {
         super();
@@ -48,9 +52,10 @@ public class RoomDAO {
      */
     public List<Room> getAllRooms(int start, int end, boolean useLimits) throws SQLException {
 
+        Properties props = ConnectionHelper.getProperties();
         List<Room> rows = new ArrayList<>();
 
-        String selectQuery = "SELECT ROOM_NUMBER, ROOM_PRICE, ROOM_TYPE, DESCRIPTION "
+        String selectQuery = "SELECT ROOM_NUMBER, ROOM_PRICE, ROOM_TYPE, IMAGE, DESCRIPTION "
                 + "FROM ROOM "
                 + "LIMIT ?, ?";
 
@@ -77,6 +82,16 @@ public class RoomDAO {
                     roomData.setRoomNumber(resultSet.getInt("ROOM_NUMBER"));
                     roomData.setRoomPrice(resultSet.getBigDecimal("ROOM_PRICE"));
                     roomData.setRoomType(resultSet.getString("ROOM_TYPE"));
+
+                    // Validating image URL and if it's partial, adding domain URL
+                    if (isURL(resultSet.getString("IMAGE"))) {
+                        // Image path contains full URL, not adding domain path
+                        roomData.setImage(resultSet.getString("IMAGE"));
+                    } else {
+                        // adding full path to the image path, retrieved from the DB
+                        roomData.setImage(props.getProperty(props.getProperty("IMG_ENVIRONMENT")) + resultSet.getString("IMAGE"));
+                    }
+
                     roomData.setDescription(resultSet.getString("DESCRIPTION"));
 
                     rows.add(roomData);
@@ -84,6 +99,70 @@ public class RoomDAO {
             }
         }
         log.log(Level.INFO, "Amount of retrieved rooms: {0}", rows.size());
+        return rows;
+    }
+
+    /**
+     * Returns all rooms which are available between two dates and price is
+     * lower and x.
+     *
+     * @param roomSearch
+     * @return
+     * @throws java.sql.SQLException
+     */
+    public List<Room> getAllAvailableRooms(RoomSearch roomSearch) throws SQLException {
+
+        Properties props = ConnectionHelper.getProperties();
+        List<Room> rows = new ArrayList<>();
+
+        String selectQuery = "SELECT ROOM_NUMBER, ROOM_PRICE, ROOM_TYPE, IMAGE, DESCRIPTION "
+                + "FROM ROOM "
+                + "WHERE ROOM_NUMBER NOT IN "
+                + "("
+                + "SELECT rm.ROOM_NUMBER "
+                + "FROM RESERVATION rs "
+                + "JOIN ROOM rm ON rs.ROOM_NUMBER = rm.ROOM_NUMBER "
+                + "WHERE CHECKIN_DATE BETWEEN ? AND ?"
+                + ")"
+                + "AND ROOM_PRICE <= ?";
+
+        // Using Java 1.7 try with resources
+        // This ensures that the objects in the parenthesis () will be closed
+        // when block ends. In this case the Connection, PreparedStatement and
+        // the ResultSet will all be closed.
+        try (Connection connection = ConnectionHelper.getConnection();
+                // Using PreparedStatements to guard against SQL Injection
+                PreparedStatement pStatement = connection.prepareStatement(selectQuery);) {
+
+                pStatement.setDate(1, convertToSqlDate(roomSearch.getCheckinDate()));
+                pStatement.setDate(2, convertToSqlDate(roomSearch.getCheckoutDate()));
+                pStatement.setBigDecimal(3, roomSearch.getRoomPrice());
+
+            try (ResultSet resultSet = pStatement.executeQuery();) {
+                while (resultSet.next()) {
+
+                    Room roomData = new Room();
+
+                    roomData.setRoomNumber(resultSet.getInt("ROOM_NUMBER"));
+                    roomData.setRoomPrice(resultSet.getBigDecimal("ROOM_PRICE"));
+                    roomData.setRoomType(resultSet.getString("ROOM_TYPE"));
+
+                    // Validating image URL and if it's partial, adding domain URL
+                    if (isURL(resultSet.getString("IMAGE"))) {
+                        // Image path contains full URL, not adding domain path
+                        roomData.setImage(resultSet.getString("IMAGE"));
+                    } else {
+                        // adding full path to the image path, retrieved from the DB
+                        roomData.setImage(props.getProperty(props.getProperty("IMG_ENVIRONMENT")) + resultSet.getString("IMAGE"));
+                    }
+
+                    roomData.setDescription(resultSet.getString("DESCRIPTION"));
+
+                    rows.add(roomData);
+                }
+            }
+        }
+        log.log(Level.INFO, "Amount of retrieved rooms matching search criteria: {0}", rows.size());
         return rows;
     }
 
@@ -96,9 +175,10 @@ public class RoomDAO {
      */
     public Room getRoom(int roomNumber) throws SQLException {
 
+        Properties props = ConnectionHelper.getProperties();
         Room roomData = new Room();
 
-        String selectQuery = "SELECT ROOM_NUMBER, ROOM_PRICE, ROOM_TYPE, DESCRIPTION "
+        String selectQuery = "SELECT ROOM_NUMBER, ROOM_PRICE, ROOM_TYPE, IMAGE, DESCRIPTION "
                 + "FROM ROOM "
                 + "WHERE ROOM_NUMBER = ?";
 
@@ -118,6 +198,16 @@ public class RoomDAO {
                     roomData.setRoomNumber(resultSet.getInt("ROOM_NUMBER"));
                     roomData.setRoomPrice(resultSet.getBigDecimal("ROOM_PRICE"));
                     roomData.setRoomType(resultSet.getString("ROOM_TYPE"));
+
+                    // Validating image URL and if it's partial, adding domain URL
+                    if (isURL(resultSet.getString("IMAGE"))) {
+                        // Image path contains full URL, not adding domain path
+                        roomData.setImage(resultSet.getString("IMAGE"));
+                    } else {
+                        // adding full path to the image path, retrieved from the DB
+                        roomData.setImage(props.getProperty(props.getProperty("IMG_ENVIRONMENT")) + resultSet.getString("IMAGE"));
+                    }
+
                     roomData.setDescription(resultSet.getString("DESCRIPTION"));
 
                 }
@@ -139,7 +229,7 @@ public class RoomDAO {
 
         String updateQuery = "UPDATE ROOM "
                 + "SET ROOM_NUMBER=?, ROOM_PRICE=?, ROOM_TYPE=?, "
-                + "DESCRIPTION=? "
+                + "IMAGE=?, DESCRIPTION=? "
                 + "WHERE ROOM_NUMBER=?";
 
         // Using Java 1.7 try with resources
@@ -153,9 +243,10 @@ public class RoomDAO {
             pStatement.setInt(1, room.getRoomNumber());
             pStatement.setBigDecimal(2, room.getRoomPrice());
             pStatement.setString(3, room.getRoomType());
-            pStatement.setString(4, room.getDescription());
+            pStatement.setString(4, room.getImage());
+            pStatement.setString(5, room.getDescription());
 
-            pStatement.setInt(5, room.getRoomNumber());
+            pStatement.setInt(6, room.getRoomNumber());
 
             result = pStatement.executeUpdate();
         }
@@ -174,8 +265,8 @@ public class RoomDAO {
         int result = 0;
 
         String createQuery = "INSERT INTO ROOM "
-                + "(ROOM_PRICE, ROOM_TYPE, DESCRIPTION) "
-                + "VALUES (?,?,?)";
+                + "(ROOM_PRICE, ROOM_TYPE, IMAGE, DESCRIPTION) "
+                + "VALUES (?,?,?,?)";
 
         // Using Java 1.7 try with resources
         // This ensures that the objects in the parenthesis () will be closed
@@ -187,7 +278,8 @@ public class RoomDAO {
 
             pStatement.setBigDecimal(1, room.getRoomPrice());
             pStatement.setString(2, room.getRoomType());
-            pStatement.setString(3, room.getDescription());
+            pStatement.setString(3, room.getImage());
+            pStatement.setString(4, room.getDescription());
 
             result = pStatement.executeUpdate();
 
@@ -226,5 +318,19 @@ public class RoomDAO {
         LocalDateTime localDateTime = LocalDateTime.parse(dateTime, formatter);
 
         return localDateTime;
+    }
+
+    /**
+     * URL validation helper method.
+     *
+     * @param path
+     * @return
+     */
+    private boolean isURL(String path) {
+
+        Pattern p = Pattern.compile(URL_REGEX);
+        Matcher m = p.matcher(path);
+
+        return m.find();
     }
 }

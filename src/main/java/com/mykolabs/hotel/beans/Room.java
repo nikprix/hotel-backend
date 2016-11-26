@@ -51,15 +51,17 @@ public class Room implements Serializable {
     @Size(max = 45)
     @Column(name = "ROOM_TYPE")
     private String roomType;
+    @Size(max = 225)
+    @Column(name = "IMAGE")
+    private String image;
     @Lob
     @Size(max = 65535)
     @Column(name = "DESCRIPTION")
     private String description;
-    
+
 //    @OneToMany(cascade = CascadeType.ALL, mappedBy = "roomNumber")
 //    @JsonIgnore
 //    private List<Reservation> reservationList;
-
     public Room() {
     }
 
@@ -91,6 +93,14 @@ public class Room implements Serializable {
         this.roomType = roomType;
     }
 
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -107,7 +117,6 @@ public class Room implements Serializable {
 //    public void setReservationList(List<Reservation> reservationList) {
 //        this.reservationList = reservationList;
 //    }
-
     @Override
     public int hashCode() {
         int hash = 0;

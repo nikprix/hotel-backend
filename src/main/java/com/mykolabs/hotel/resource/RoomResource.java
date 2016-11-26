@@ -21,10 +21,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import com.google.common.collect.Sets;
 import com.mykolabs.hotel.authentication.AuthenticationFilter;
 import com.mykolabs.hotel.beans.Room;
 import com.mykolabs.hotel.beans.RoomList;
+import com.mykolabs.hotel.beans.RoomSearch;
 import com.mykolabs.hotel.mappers.AuthenticationExceptionMapper;
 import com.mykolabs.hotel.mappers.GeneralExceptionMapper;
 import com.mykolabs.hotel.persistence.RoomDAO;
@@ -69,14 +69,36 @@ public class RoomResource extends ResourceConfig {
 
         RoomList roomList = new RoomList();
         RoomDAO roomDAO = new RoomDAO();
-        // retrieving reservations from the DB
+        // retrieving rooms from the DB
         roomList.setRoomList(roomDAO.getAllRooms(0, 100, true));
 
         return roomList;
     }
 
     /**
-     * Retrieves single room from the DB by provided ID. 
+     * Retrieves ALL rooms from the DB which match provided search criteria.
+     *
+     * @param roomSearch
+     * @return an instance of java.lang.String
+     * @throws java.sql.SQLException
+     */
+    @POST
+    @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/availablerooms")
+    public RoomList getAllavailableRooms(final RoomSearch roomSearch) throws SQLException {
+
+        RoomList roomList = new RoomList();
+        RoomDAO roomDAO = new RoomDAO();
+        // retrieving rooms from the DB
+        roomList.setRoomList(roomDAO.getAllAvailableRooms(roomSearch));
+
+        return roomList;
+    }
+
+    /**
+     * Retrieves single room from the DB by provided ID.
      *
      * @param id
      * @return an instance of java.lang.String
