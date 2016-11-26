@@ -14,5 +14,5 @@ hs_err_pid*
 /target/
 /nbproject/
 /src/test/resources/HotelDBCreate.sql
-/src/main/resources/db.properties
+/src/main/resources/prod-db.properties
 /src/main/webapp/WEB-INF/glassfish-resources.xml
