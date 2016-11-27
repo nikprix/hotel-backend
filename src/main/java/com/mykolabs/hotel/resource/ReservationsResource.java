@@ -23,8 +23,11 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import com.google.common.collect.Sets;
 import com.mykolabs.hotel.authentication.AuthenticationFilter;
+import com.mykolabs.hotel.beans.TodayDate;
+import com.mykolabs.hotel.beans.TodayReservationList;
 import com.mykolabs.hotel.mappers.AuthenticationExceptionMapper;
 import com.mykolabs.hotel.mappers.GeneralExceptionMapper;
+import java.util.Date;
 
 /**
  * REST Web Service to manage hotel reservations (Jersey / ).
@@ -53,8 +56,8 @@ public class ReservationsResource extends ResourceConfig {
     }
 
     /**
-     * Retrieves ALL reservations from the DB. Future enhancement - add limits by
-     * DateOfEntry - start / end date.
+     * Retrieves ALL reservations from the DB. Future enhancement - add limits
+     * by DateOfEntry - start / end date.
      *
      * @return an instance of java.lang.String
      * @throws java.sql.SQLException
@@ -73,7 +76,29 @@ public class ReservationsResource extends ResourceConfig {
     }
 
     /**
-     * Retrieves single reservation from the DB. 
+     * Retrieves ALL TODAY reservations from the DB.
+     *
+     * @param currentDate
+     * @return an instance of java.lang.String
+     * @throws java.sql.SQLException
+     */
+    @POST
+    @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/todayReservations")
+    public TodayReservationList getAllTodayReservations(TodayDate currentDate) throws SQLException {
+
+        TodayReservationList todayReservationList = new TodayReservationList();
+        ReservationDAO reservationDAO = new ReservationDAO();
+        // retrieving all today reservations from the DB
+        todayReservationList.setTodayReservationList(reservationDAO.getAllTodayReservations(currentDate));
+
+        return todayReservationList;
+    }
+
+    /**
+     * Retrieves single reservation from the DB.
      *
      * @param id
      * @return an instance of java.lang.String

@@ -32,6 +32,8 @@ import javax.ws.rs.core.Response;
 public class AuthenticationEndpoint {
 
     private static final Logger log = Logger.getLogger(AuthenticationEndpoint.class.getName());
+    
+    private static final int EXPIRATION = 3600;
 
     /**
      * HK2 Injection.
@@ -55,7 +57,7 @@ public class AuthenticationEndpoint {
         Employee authenticatedUser = authenticateEmployee(username, password);
 
         // Issue a token for the user
-        Date expiry = getExpiryDate(100);
+        Date expiry = getExpiryDate(EXPIRATION);
 
         // The issued token must be associated to a user
         // Return the issued token

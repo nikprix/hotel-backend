@@ -4,6 +4,8 @@ import com.mykolabs.hotel.beans.Customer;
 import com.mykolabs.hotel.beans.Employee;
 import com.mykolabs.hotel.beans.Reservation;
 import com.mykolabs.hotel.beans.Room;
+import com.mykolabs.hotel.beans.TodayDate;
+import com.mykolabs.hotel.beans.TodayReservation;
 import com.mykolabs.hotel.util.ConnectionHelper;
 import com.mysql.jdbc.Statement;
 import java.net.URL;
@@ -11,9 +13,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -92,6 +97,59 @@ public class ReservationDAO {
                     reservationsData.setEmployteeId(resultSet.getInt("EMPLOYEE_ID"));
 
                     rows.add(reservationsData);
+                }
+            }
+        }
+        log.log(Level.INFO, "Amount of retrieved reservations: {0}", rows.size());
+        return rows;
+    }
+
+    /**
+     * Returns all TODAYs reservations from the RESERVATION table Joined on
+     * Customer table.
+     *
+     * @param currentDate
+     * @return
+     * @throws java.sql.SQLException
+     */
+    public List<TodayReservation> getAllTodayReservations(TodayDate currentDate) throws SQLException {
+
+        List<TodayReservation> rows = new ArrayList<>();
+        
+        log.log(Level.INFO, "=========Provided by Client Date========: {0}", currentDate.getCurrentDate().toString());
+
+        String selectQuery = "SELECT rs.RESERVATION_ID, cst.FIRST_NAME, cst.LAST_NAME, rs.ROOM_NUMBER, rs.CHECKIN_DATE "
+                + "FROM RESERVATION rs "
+                + "JOIN CUSTOMER cst ON rs.CUSTOMER_ID = cst.CUSTOMER_ID "
+                + "WHERE rs.CHECKIN_DATE BETWEEN ? AND DATE_ADD(?, INTERVAL 24 HOUR)";
+
+        // Using Java 1.7 try with resources
+        // This ensures that the objects in the parenthesis () will be closed
+        // when block ends. In this case the Connection, PreparedStatement and
+        // the ResultSet will all be closed.
+        try (Connection connection = ConnectionHelper.getConnection();
+                // Using PreparedStatements to guard against SQL Injection
+                PreparedStatement pStatement = connection.prepareStatement(selectQuery);) {
+
+                pStatement.setDate(1, convertToSqlDate(currentDate.getCurrentDate()));
+                pStatement.setDate(2, convertToSqlDate(currentDate.getCurrentDate()));
+    
+            try (ResultSet resultSet = pStatement.executeQuery();) {
+                while (resultSet.next()) {
+
+                    TodayReservation todayReservationData = new TodayReservation();
+                    
+                    todayReservationData.setReservationId(resultSet.getInt("RESERVATION_ID"));
+                    todayReservationData.setFirstName(resultSet.getString("FIRST_NAME"));
+                    todayReservationData.setLastName(resultSet.getString("LAST_NAME"));
+                    todayReservationData.setRoomNumber(resultSet.getInt("ROOM_NUMBER"));
+                    todayReservationData.setCheckinDate(resultSet.getDate("CHECKIN_DATE"));
+  
+                    // printing converted date and time to the server logs:
+                    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                    log.log(Level.INFO, "=====Retrieved Checking Date/Time====: {0}", dateFormat.format(resultSet.getDate("CHECKIN_DATE")));
+                    
+                    rows.add(todayReservationData);
                 }
             }
         }
@@ -227,17 +285,15 @@ public class ReservationDAO {
             pStatement.setInt(5, reservation.getEmployteeId());
 
             result = pStatement.executeUpdate();
-            
+
             try (ResultSet generatedKeys = pStatement.getGeneratedKeys()) {
-            if (generatedKeys.next()) {
-                reservation.setReservationId(generatedKeys.getInt(1));
+                if (generatedKeys.next()) {
+                    reservation.setReservationId(generatedKeys.getInt(1));
+                } else {
+                    throw new SQLException("Creating reservation failed, no ID obtained.");
+                }
             }
-            else {
-                throw new SQLException("Creating reservation failed, no ID obtained.");
-            }
-        }
-            
-            
+
         }
         log.log(Level.INFO, "Create status: {0}", result);
         log.log(Level.INFO, "Created reservation with reservationID: {0}", reservation.getReservationId());
