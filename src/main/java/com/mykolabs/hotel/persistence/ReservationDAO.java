@@ -4,6 +4,7 @@ import com.mykolabs.hotel.beans.Customer;
 import com.mykolabs.hotel.beans.Employee;
 import com.mykolabs.hotel.beans.Reservation;
 import com.mykolabs.hotel.beans.Room;
+import com.mykolabs.hotel.beans.ReservationSearch;
 import com.mykolabs.hotel.beans.TodayDate;
 import com.mykolabs.hotel.beans.TodayReservation;
 import com.mykolabs.hotel.util.ConnectionHelper;
@@ -55,6 +56,7 @@ public class ReservationDAO {
 
         String selectQuery = "SELECT RESERVATION_ID, CHECKIN_DATE, CHECKOUT_DATE, CUSTOMER_ID, ROOM_NUMBER, EMPLOYEE_ID "
                 + "FROM RESERVATION "
+                + "ORDER BY CHECKIN_DATE DESC "
                 + "LIMIT ?, ?";
 
         // Using Java 1.7 try with resources
@@ -115,7 +117,7 @@ public class ReservationDAO {
     public List<TodayReservation> getAllTodayReservations(TodayDate currentDate) throws SQLException {
 
         List<TodayReservation> rows = new ArrayList<>();
-        
+
         log.log(Level.INFO, "=========Provided by Client Date========: {0}", currentDate.getCurrentDate().toString());
 
         String selectQuery = "SELECT rs.RESERVATION_ID, cst.FIRST_NAME, cst.LAST_NAME, rs.ROOM_NUMBER, rs.CHECKIN_DATE "
@@ -131,24 +133,122 @@ public class ReservationDAO {
                 // Using PreparedStatements to guard against SQL Injection
                 PreparedStatement pStatement = connection.prepareStatement(selectQuery);) {
 
-                pStatement.setDate(1, convertToSqlDate(currentDate.getCurrentDate()));
-                pStatement.setDate(2, convertToSqlDate(currentDate.getCurrentDate()));
-    
+            pStatement.setDate(1, convertToSqlDate(currentDate.getCurrentDate()));
+            pStatement.setDate(2, convertToSqlDate(currentDate.getCurrentDate()));
+
             try (ResultSet resultSet = pStatement.executeQuery();) {
                 while (resultSet.next()) {
 
                     TodayReservation todayReservationData = new TodayReservation();
-                    
+
                     todayReservationData.setReservationId(resultSet.getInt("RESERVATION_ID"));
                     todayReservationData.setFirstName(resultSet.getString("FIRST_NAME"));
                     todayReservationData.setLastName(resultSet.getString("LAST_NAME"));
                     todayReservationData.setRoomNumber(resultSet.getInt("ROOM_NUMBER"));
                     todayReservationData.setCheckinDate(resultSet.getDate("CHECKIN_DATE"));
-  
+
                     // printing converted date and time to the server logs:
                     DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                     log.log(Level.INFO, "=====Retrieved Checking Date/Time====: {0}", dateFormat.format(resultSet.getDate("CHECKIN_DATE")));
-                    
+
+                    rows.add(todayReservationData);
+                }
+            }
+        }
+        log.log(Level.INFO, "Amount of retrieved reservations: {0}", rows.size());
+        return rows;
+    }
+
+    /**
+     * Returns all reservations JOINED with ROOM/CUSTOMER data from the
+     * RESERVATION/ROOM/CUSTOMER tables, Using 'TodayReservation' class
+     *
+     * @return
+     * @throws java.sql.SQLException
+     */
+    public List<TodayReservation> getAllReservationsWithCustomerData() throws SQLException {
+
+        List<TodayReservation> rows = new ArrayList<>();
+
+        String selectQuery = "SELECT rs.RESERVATION_ID, cst.FIRST_NAME, cst.LAST_NAME, rs.ROOM_NUMBER, rs.CHECKIN_DATE "
+                + "FROM RESERVATION rs "
+                + "JOIN CUSTOMER cst ON rs.CUSTOMER_ID = cst.CUSTOMER_ID "
+                + "ORDER BY rs.CHECKIN_DATE DESC";
+
+        // Using Java 1.7 try with resources
+        // This ensures that the objects in the parenthesis () will be closed
+        // when block ends. In this case the Connection, PreparedStatement and
+        // the ResultSet will all be closed.
+        try (Connection connection = ConnectionHelper.getConnection();
+                // Using PreparedStatements to guard against SQL Injection
+                PreparedStatement pStatement = connection.prepareStatement(selectQuery);) {
+
+            try (ResultSet resultSet = pStatement.executeQuery();) {
+                while (resultSet.next()) {
+
+                    TodayReservation todayReservationData = new TodayReservation();
+
+                    todayReservationData.setReservationId(resultSet.getInt("RESERVATION_ID"));
+                    todayReservationData.setFirstName(resultSet.getString("FIRST_NAME"));
+                    todayReservationData.setLastName(resultSet.getString("LAST_NAME"));
+                    todayReservationData.setRoomNumber(resultSet.getInt("ROOM_NUMBER"));
+                    todayReservationData.setCheckinDate(resultSet.getDate("CHECKIN_DATE"));
+
+                    // printing converted date and time to the server logs:
+                    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                    log.log(Level.INFO, "=====Retrieved Checking Date/Time====: {0}", dateFormat.format(resultSet.getDate("CHECKIN_DATE")));
+
+                    rows.add(todayReservationData);
+                }
+            }
+        }
+        log.log(Level.INFO, "Amount of retrieved reservations: {0}", rows.size());
+        return rows;
+    }
+
+    /**
+     * Returns all reservations for checkin date using 'TodayReservation' class
+     *
+     * @param reservationSearch
+     * @return
+     * @throws java.sql.SQLException
+     */
+    public List<TodayReservation> getReservationsForCheckin(ReservationSearch reservationSearch) throws SQLException {
+
+        List<TodayReservation> rows = new ArrayList<>();
+
+        String selectQuery = "SELECT rs.RESERVATION_ID, cst.FIRST_NAME, cst.LAST_NAME, rs.ROOM_NUMBER, rs.CHECKIN_DATE "
+                + "FROM RESERVATION rs "
+                + "JOIN CUSTOMER cst ON rs.CUSTOMER_ID = cst.CUSTOMER_ID "
+                + "WHERE rs.CHECKIN_DATE BETWEEN ? AND DATE_ADD(?, INTERVAL 24 HOUR) "
+                + "ORDER BY rs.CHECKIN_DATE ASC";
+
+        // Using Java 1.7 try with resources
+        // This ensures that the objects in the parenthesis () will be closed
+        // when block ends. In this case the Connection, PreparedStatement and
+        // the ResultSet will all be closed.
+        try (Connection connection = ConnectionHelper.getConnection();
+                // Using PreparedStatements to guard against SQL Injection
+                PreparedStatement pStatement = connection.prepareStatement(selectQuery);) {
+            
+            pStatement.setDate(1, convertToSqlDate(reservationSearch.getCheckinDate()));
+            pStatement.setDate(2, convertToSqlDate(reservationSearch.getCheckinDate()));
+
+            try (ResultSet resultSet = pStatement.executeQuery();) {
+                while (resultSet.next()) {
+
+                    TodayReservation todayReservationData = new TodayReservation();
+
+                    todayReservationData.setReservationId(resultSet.getInt("RESERVATION_ID"));
+                    todayReservationData.setFirstName(resultSet.getString("FIRST_NAME"));
+                    todayReservationData.setLastName(resultSet.getString("LAST_NAME"));
+                    todayReservationData.setRoomNumber(resultSet.getInt("ROOM_NUMBER"));
+                    todayReservationData.setCheckinDate(resultSet.getDate("CHECKIN_DATE"));
+
+                    // printing converted date and time to the server logs:
+                    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                    log.log(Level.INFO, "=====Retrieved Checking Date/Time====: {0}", dateFormat.format(resultSet.getDate("CHECKIN_DATE")));
+
                     rows.add(todayReservationData);
                 }
             }

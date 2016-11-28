@@ -6,6 +6,8 @@
 package com.mykolabs.hotel.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.mykolabs.hotel.util.CustomDateSerializer;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -52,11 +54,13 @@ public class Reservation implements Serializable {
     @NotNull
     @Column(name = "CHECKIN_DATE")
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonSerialize(using = CustomDateSerializer.class)
     private Date checkinDate;
     @Basic(optional = false)
     @NotNull
     @Column(name = "CHECKOUT_DATE")
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonSerialize(using = CustomDateSerializer.class)
     private Date checkoutDate;
 
 //    @OneToMany(cascade = CascadeType.ALL, mappedBy = "reservationId")

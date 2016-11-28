@@ -68,8 +68,6 @@ public class TodayReservation {
     }
 
     public Date getCheckinDate() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        log.log(Level.INFO, "====Date obj before sending as JSON====: {0}", dateFormat.format(checkinDate));
         return checkinDate;
     }
 

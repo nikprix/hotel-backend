@@ -5,6 +5,7 @@
  */
 package com.mykolabs.hotel.beans;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import javax.persistence.Basic;
@@ -26,6 +27,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  * @author nikprixmar
  */
+@JsonFilter("paymentFilter")
 @Entity
 @Table(name = "PAYMENT", catalog = "HOTEL", schema = "")
 @XmlRootElement

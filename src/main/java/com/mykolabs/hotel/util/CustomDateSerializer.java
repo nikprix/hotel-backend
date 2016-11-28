@@ -19,7 +19,7 @@ import java.util.Date;
  */
 public class CustomDateSerializer extends StdSerializer<Date> {
     private SimpleDateFormat formatter = 
-      new SimpleDateFormat("dd-MM-yyyy hh:mm a z");
+      new SimpleDateFormat("dd/MM/yyyy hh:mm a z");
  
     public CustomDateSerializer() {
         this(null);

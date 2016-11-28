@@ -30,7 +30,7 @@ import com.mykolabs.hotel.mappers.GeneralExceptionMapper;
 import com.mykolabs.hotel.persistence.RoomDAO;
 
 /**
- * REST Web Service to manage hotel reservations (Jersey / ).
+ * REST Web Service to manage hotel rooms (Jersey ).
  *
  * ref: http://howtodoinjava.com/jersey/jersey-restful-client-examples/
  *
@@ -46,13 +46,21 @@ public class RoomResource extends ResourceConfig {
      */
     public RoomResource() {
 
+                // ============= IMPORTANT =============== //
+        // registering resources and providers is DONE in web.xml
+        // registering in both places, here and in web.xml will end up
+        // having really bad exception while deploying app:
+        // "Caused by: java.lang.OutOfMemoryError: GC overhead limit exceeded"
+        // AVOID!!!
+        
         /* REGISTERING Resources and Providers */
         // also, init-params needs to be added to the web.xml file
-        //registering using ResourceConfig (this class extends ResourceConfig) 
-        packages("com.mykolabs.hotel.authentication;com.mykolabs.hotel.mappers;");
-        register(AuthenticationFilter.class);
-        register(AuthenticationExceptionMapper.class);
-        register(GeneralExceptionMapper.class);
+        //registering using ResourceConfig (this class extends ResourceConfig)
+        
+//        packages("com.mykolabs.hotel.authentication;com.mykolabs.hotel.mappers;");
+//        register(AuthenticationFilter.class);
+//        register(AuthenticationExceptionMapper.class);
+//        register(GeneralExceptionMapper.class);
     }
 
     /**

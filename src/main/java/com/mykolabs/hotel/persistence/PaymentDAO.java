@@ -157,6 +157,62 @@ public class PaymentDAO {
         log.log(Level.INFO, "Retrieved payment with paymentID: {0}", paymentData.getPaymentId());
         return paymentData;
     }
+    
+     /**
+     * Returns single payment from the PAYMENTS table searched by ReservationId.
+     *
+     * @param reservationId
+     * @return
+     * @throws java.sql.SQLException
+     */
+    public Payment getPaymentByReservationId(int reservationId) throws SQLException {
+
+        Properties props = ConnectionHelper.getProperties();
+        Payment paymentData = new Payment();
+
+        String selectQuery = "SELECT PAYMENT_ID, CARD_TYPE, CARD_NUMBER, CARD_EXPIRATION, PAYMENT_AMOUNT, DESCRIPTION, "
+                + "CUSTOMER_ID, RESERVATION_ID "
+                + "FROM PAYMENT "
+                + "WHERE RESERVATION_ID = ?";
+
+        // Using Java 1.7 try with resources
+        // This ensures that the objects in the parenthesis () will be closed
+        // when block ends. In this case the Connection, PreparedStatement and
+        // the ResultSet will all be closed.
+        try (Connection connection = ConnectionHelper.getConnection();
+                // Using PreparedStatements to guard against SQL Injection
+                PreparedStatement pStatement = connection.prepareStatement(selectQuery);) {
+
+            pStatement.setInt(1, reservationId);
+
+            try (ResultSet resultSet = pStatement.executeQuery();) {
+                while (resultSet.next()) {
+
+                    paymentData.setPaymentId(resultSet.getInt("PAYMENT_ID"));
+                    paymentData.setCardType(resultSet.getString("CARD_TYPE"));
+                    paymentData.setCardNumber(resultSet.getString("CARD_NUMBER"));
+                    paymentData.setCardExpiration(resultSet.getString("CARD_EXPIRATION"));
+                    paymentData.setPaymentAmount(resultSet.getBigDecimal("PAYMENT_AMOUNT"));
+                    paymentData.setDescription(resultSet.getString("DESCRIPTION"));
+
+//                    CustomerDAO customerDAO = new CustomerDAO();
+//                    Customer customer = customerDAO.getCustomer(resultSet.getInt("CUSTOMER_ID"));
+//
+//                    ReservationDAO reservationDAO = new ReservationDAO();
+//                    Reservation reservation = reservationDAO.getReservation(resultSet.getInt("RESERVATION_ID"));
+//
+//                    paymentData.setCustomerId(customer);
+//                    paymentData.setReservationId(reservation);
+
+                    paymentData.setCustomerId(resultSet.getInt("CUSTOMER_ID"));
+                    paymentData.setReservationId(resultSet.getInt("RESERVATION_ID"));
+
+                }
+            }
+        }
+        log.log(Level.INFO, "Retrieved payment with ReservationId: {0}", paymentData.getReservationId());
+        return paymentData;
+    }
 
     /**
      * Updates single payment in the PAYMENT table.

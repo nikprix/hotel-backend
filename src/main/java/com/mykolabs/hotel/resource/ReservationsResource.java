@@ -23,6 +23,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import com.google.common.collect.Sets;
 import com.mykolabs.hotel.authentication.AuthenticationFilter;
+import com.mykolabs.hotel.beans.AllReservationListWithCustomer;
+import com.mykolabs.hotel.beans.ReservationSearch;
 import com.mykolabs.hotel.beans.TodayDate;
 import com.mykolabs.hotel.beans.TodayReservationList;
 import com.mykolabs.hotel.mappers.AuthenticationExceptionMapper;
@@ -46,13 +48,20 @@ public class ReservationsResource extends ResourceConfig {
      */
     public ReservationsResource() {
 
+        // ============= IMPORTANT =============== //
+        // registering resources and providers is DONE in web.xml
+        // registering in both places, here and in web.xml will end up
+        // having really bad exception while deploying app:
+        // "Caused by: java.lang.OutOfMemoryError: GC overhead limit exceeded"
+        // AVOID!!!
+
         /* REGISTERING Resources and Providers */
         // also, init-params needs to be added to the web.xml file
-        //registering using ResourceConfig (this class extends ResourceConfig) 
-        packages("com.mykolabs.hotel.authentication;com.mykolabs.hotel.mappers;");
-        register(AuthenticationFilter.class);
-        register(AuthenticationExceptionMapper.class);
-        register(GeneralExceptionMapper.class);
+        //registering using ResourceConfig (this class extends ResourceConfig)
+//        packages("com.mykolabs.hotel.authentication;com.mykolabs.hotel.mappers;");
+//        register(AuthenticationFilter.class);
+//        register(AuthenticationExceptionMapper.class);
+//        register(GeneralExceptionMapper.class);
     }
 
     /**
@@ -65,14 +74,16 @@ public class ReservationsResource extends ResourceConfig {
     @GET
     @Secured
     @Produces(MediaType.APPLICATION_JSON)
-    public ReservationList getAllReservations() throws SQLException {
+    public AllReservationListWithCustomer getAllReservations() throws SQLException {
 
-        ReservationList reservationList = new ReservationList();
+        // NOTE, using 'TodayReservationList' class here, since it has 
+        // all needed data, but 
+        AllReservationListWithCustomer allReservationList = new AllReservationListWithCustomer();
         ReservationDAO reservationDAO = new ReservationDAO();
         // retrieving reservations from the DB
-        reservationList.setReservationList(reservationDAO.getAllReservations(0, 100, true));
+        allReservationList.setAllReservationList(reservationDAO.getAllReservationsWithCustomerData());
 
-        return reservationList;
+        return allReservationList;
     }
 
     /**
@@ -95,6 +106,30 @@ public class ReservationsResource extends ResourceConfig {
         todayReservationList.setTodayReservationList(reservationDAO.getAllTodayReservations(currentDate));
 
         return todayReservationList;
+    }
+
+    /**
+     * Retrieves ALL rooms from the DB which match provided search criteria.
+     * Have to use 'TodayReservationList' but indeed it returns not only today
+     * data, but data, which matches search criteria
+     *
+     * @param reservationSearch
+     * @return an instance of java.lang.String
+     * @throws java.sql.SQLException
+     */
+    @POST
+    @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/availableReservations")
+    public TodayReservationList getAllavailableReservations(final ReservationSearch reservationSearch) throws SQLException {
+
+        TodayReservationList reservationList = new TodayReservationList();
+        ReservationDAO reservationDAO = new ReservationDAO();
+        // retrieving rooms from the DB
+        reservationList.setTodayReservationList(reservationDAO.getReservationsForCheckin(reservationSearch));
+
+        return reservationList;
     }
 
     /**
