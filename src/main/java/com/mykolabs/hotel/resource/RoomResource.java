@@ -2,7 +2,7 @@ package com.mykolabs.hotel.resource;
 
 import com.mykolabs.hotel.authentication.Secured;
 import com.mykolabs.hotel.beans.Reservation;
-import com.mykolabs.hotel.beans.ReservationList;
+import com.mykolabs.hotel.beansLists.ReservationList;
 import com.mykolabs.hotel.persistence.ReservationDAO;
 import com.mykolabs.hotel.util.Validator;
 import java.net.URI;
@@ -23,7 +23,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import com.mykolabs.hotel.authentication.AuthenticationFilter;
 import com.mykolabs.hotel.beans.Room;
-import com.mykolabs.hotel.beans.RoomList;
+import com.mykolabs.hotel.beansLists.RoomList;
 import com.mykolabs.hotel.beans.RoomSearch;
 import com.mykolabs.hotel.mappers.AuthenticationExceptionMapper;
 import com.mykolabs.hotel.mappers.GeneralExceptionMapper;

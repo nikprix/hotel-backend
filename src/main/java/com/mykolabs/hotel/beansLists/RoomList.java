@@ -1,5 +1,6 @@
-package com.mykolabs.hotel.beans;
+package com.mykolabs.hotel.beansLists;
 
+import com.mykolabs.hotel.beans.Room;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;

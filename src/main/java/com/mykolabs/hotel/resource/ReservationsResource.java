@@ -2,7 +2,7 @@ package com.mykolabs.hotel.resource;
 
 import com.mykolabs.hotel.authentication.Secured;
 import com.mykolabs.hotel.beans.Reservation;
-import com.mykolabs.hotel.beans.ReservationList;
+import com.mykolabs.hotel.beansLists.ReservationList;
 import com.mykolabs.hotel.persistence.ReservationDAO;
 import com.mykolabs.hotel.util.Validator;
 import java.net.URI;
@@ -23,13 +23,14 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import com.google.common.collect.Sets;
 import com.mykolabs.hotel.authentication.AuthenticationFilter;
-import com.mykolabs.hotel.beans.AllReservationListWithCustomer;
+import com.mykolabs.hotel.beansLists.AllReservationListWithCustomer;
 import com.mykolabs.hotel.beans.ReservationSearch;
 import com.mykolabs.hotel.beans.TodayDate;
-import com.mykolabs.hotel.beans.TodayReservationList;
+import com.mykolabs.hotel.beansLists.TodayReservationList;
 import com.mykolabs.hotel.mappers.AuthenticationExceptionMapper;
 import com.mykolabs.hotel.mappers.GeneralExceptionMapper;
 import java.util.Date;
+import javax.ws.rs.DELETE;
 
 /**
  * REST Web Service to manage hotel reservations (Jersey / ).
@@ -228,6 +229,31 @@ public class ReservationsResource extends ResourceConfig {
         }
 
         return Response.created(new URI("reservations/" + reservation.getReservationId())).build();
+    }
+
+    /**
+     * Removes reservation by provided id. NOTE, since cascading was enabled for
+     * these tables, it will also remove related payment(s), which holds
+     * reservation id. Not good idea, but works for demo purposes.
+     *
+     * @param id
+     * @return an instance of java.lang.String
+     * @throws java.sql.SQLException
+     */
+    @DELETE
+    @Secured
+    @Path("{id}")
+    public Response deleteReservation(@PathParam("id") int id) throws SQLException {
+
+        ReservationDAO reservationDAO = new ReservationDAO();
+        int deleteStatus = reservationDAO.deleteReservation(id);
+
+        if (deleteStatus != 1) {
+            return Response.status(400).entity("{\"error\":\"An error occured while removing reservation. "
+                    + "Please try again\"}").build();
+        } else {
+            return Response.status(202).entity("{\"message\":\"Reservation and payment info were removed\"}").build();
+        }
     }
 
     @OPTIONS

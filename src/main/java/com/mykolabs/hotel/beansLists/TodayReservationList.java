@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.mykolabs.hotel.beans;
+package com.mykolabs.hotel.beansLists;
 
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;

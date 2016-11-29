@@ -6,7 +6,7 @@ import com.mykolabs.hotel.beans.Reservation;
 import com.mykolabs.hotel.beans.Room;
 import com.mykolabs.hotel.beans.ReservationSearch;
 import com.mykolabs.hotel.beans.TodayDate;
-import com.mykolabs.hotel.beans.TodayReservation;
+import com.mykolabs.hotel.beansLists.TodayReservation;
 import com.mykolabs.hotel.util.ConnectionHelper;
 import com.mysql.jdbc.Statement;
 import java.net.URL;
@@ -397,6 +397,38 @@ public class ReservationDAO {
         }
         log.log(Level.INFO, "Create status: {0}", result);
         log.log(Level.INFO, "Created reservation with reservationID: {0}", reservation.getReservationId());
+        return result;
+    }
+    
+        /**
+     * This method deletes a single Reservation record based on the criteria
+     * of the primary key field ID value.
+     *
+     * @param reservationId
+     * @return The number of records deleted, should be 0 or 1
+     * @throws SQLException
+     */
+    public int deleteReservation(int reservationId) throws SQLException {
+        int result = 0;
+
+        String deleteQuery = "DELETE FROM RESERVATION WHERE RESERVATION_ID = ?";
+
+        // Using Java 1.7 try with resources
+        // This ensures that the objects in the parenthesis () will be closed
+        // when block ends. In this case the Connection, PreparedStatement and
+        // the ResultSet will all be closed.
+        try (Connection connection = ConnectionHelper.getConnection();
+                // Using PreparedStatements to guard against SQL Injection
+                PreparedStatement pStatement = connection.prepareStatement(deleteQuery);) {
+
+            pStatement.setInt(1, reservationId);
+
+            result = pStatement.executeUpdate();
+        }
+        log.log(Level.INFO, "Create status: {0}", result);
+        
+        if(result == 1) log.log(Level.INFO, "Removed reservation with reservationID: {0}", reservationId);
+        
         return result;
     }
 
