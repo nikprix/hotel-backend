@@ -6,7 +6,9 @@
 package com.mykolabs.hotel.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.mykolabs.hotel.util.CustomDateDeserializer;
 import com.mykolabs.hotel.util.CustomDateSerializer;
 import java.io.Serializable;
 import java.util.Date;
@@ -55,12 +57,14 @@ public class Reservation implements Serializable {
     @Column(name = "CHECKIN_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     @JsonSerialize(using = CustomDateSerializer.class)
+    //@JsonDeserialize(using = CustomDateDeserializer.class)
     private Date checkinDate;
     @Basic(optional = false)
     @NotNull
     @Column(name = "CHECKOUT_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     @JsonSerialize(using = CustomDateSerializer.class)
+    //@JsonDeserialize(using = CustomDateDeserializer.class)
     private Date checkoutDate;
 
 //    @OneToMany(cascade = CascadeType.ALL, mappedBy = "reservationId")
@@ -85,7 +89,7 @@ public class Reservation implements Serializable {
 
     @Basic(optional = false)
     @Column(name = "EMPLOYEE_ID")
-    private Integer employteeId;
+    private Integer employeeId;
 
     public Reservation() {
     }
@@ -173,12 +177,12 @@ public class Reservation implements Serializable {
         this.roomNumberId = roomNumberId;
     }
 
-    public Integer getEmployteeId() {
-        return employteeId;
+    public Integer getEmployeeId() {
+        return employeeId;
     }
 
-    public void setEmployteeId(Integer employteeId) {
-        this.employteeId = employteeId;
+    public void setEmployeeId(Integer employeeId) {
+        this.employeeId = employeeId;
     }
     
     @Override

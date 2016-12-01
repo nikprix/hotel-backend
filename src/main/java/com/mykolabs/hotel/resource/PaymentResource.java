@@ -125,15 +125,18 @@ public class PaymentResource extends ResourceConfig {
 
         PaymentDAO paymentDAO = new PaymentDAO();
 
-        int paymentStatus = 0;
+        int paymentId = 0;
 
-        paymentStatus = paymentDAO.addPayment(payment);
+        paymentId = paymentDAO.addPayment(payment);
 
-        if (paymentStatus != 1) {
+        if (paymentId <= 0) {
             return Response.status(400).entity("{\"error\":\"An error occured while adding a payment. Please try again\"}").build();
         }
 
-        return Response.created(new URI("payments/" + payment.getPaymentId())).build();
+               return Response
+                .created(new URI("payments/" + paymentId))
+                .entity("{\"paymentId\":"+paymentId+"}")
+                .build();
     }
 
     @OPTIONS

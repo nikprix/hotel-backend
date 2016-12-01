@@ -145,15 +145,18 @@ public class CustomerResource extends ResourceConfig {
 
         CustomerDAO customerDAO = new CustomerDAO();
 
-        int customerStatus = 0;
+        int customerId;
 
-        customerStatus = customerDAO.addCustomer(customer);
+        customerId = customerDAO.addCustomer(customer);
 
-        if (customerStatus != 1) {
+        if (customerId <= 0) {
             return Response.status(400).entity("{\"error\":\"An error occured while adding a customer. Please try again\"}").build();
         }
 
-        return Response.created(new URI("customers/" + customer.getCustomerId())).build();
+        return Response
+                .created(new URI("customers/" + customerId))
+                .entity("{\"customerId\":"+customerId+"}")
+                .build();
     }
 
     @OPTIONS

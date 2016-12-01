@@ -220,15 +220,18 @@ public class ReservationsResource extends ResourceConfig {
 
         ReservationDAO reservationDAO = new ReservationDAO();
 
-        int reservationStatus = 0;
+        int reservationId = 0;
 
-        reservationStatus = reservationDAO.addReservation(reservation);
+        reservationId = reservationDAO.addReservation(reservation);
 
-        if (reservationStatus != 1) {
+        if (reservationId <= 0) {
             return Response.status(400).entity("{\"error\":\"An error occured while adding reservation. Please try again\"}").build();
         }
 
-        return Response.created(new URI("reservations/" + reservation.getReservationId())).build();
+        return Response
+                .created(new URI("reservations/" + reservationId))
+                .entity("{\"reservationId\":" + reservationId + "}")
+                .build();
     }
 
     /**

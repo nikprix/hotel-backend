@@ -6,6 +6,7 @@ import com.mykolabs.hotel.beans.Payment;
 import com.mykolabs.hotel.beans.Reservation;
 import com.mykolabs.hotel.beans.Room;
 import com.mykolabs.hotel.util.ConnectionHelper;
+import com.mysql.jdbc.Statement;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Connection;
@@ -89,10 +90,8 @@ public class PaymentDAO {
 //
 //                    paymentsData.setCustomerId(customer);
 //                    paymentsData.setReservationId(reservation);
-
                     paymentsData.setCustomerId(resultSet.getInt("CUSTOMER_ID"));
                     paymentsData.setReservationId(resultSet.getInt("RESERVATION_ID"));
-
 
                     rows.add(paymentsData);
                 }
@@ -147,7 +146,6 @@ public class PaymentDAO {
 //
 //                    paymentData.setCustomerId(customer);
 //                    paymentData.setReservationId(reservation);
-
                     paymentData.setCustomerId(resultSet.getInt("CUSTOMER_ID"));
                     paymentData.setReservationId(resultSet.getInt("RESERVATION_ID"));
 
@@ -157,8 +155,8 @@ public class PaymentDAO {
         log.log(Level.INFO, "Retrieved payment with paymentID: {0}", paymentData.getPaymentId());
         return paymentData;
     }
-    
-     /**
+
+    /**
      * Returns single payment from the PAYMENTS table searched by ReservationId.
      *
      * @param reservationId
@@ -203,7 +201,6 @@ public class PaymentDAO {
 //
 //                    paymentData.setCustomerId(customer);
 //                    paymentData.setReservationId(reservation);
-
                     paymentData.setCustomerId(resultSet.getInt("CUSTOMER_ID"));
                     paymentData.setReservationId(resultSet.getInt("RESERVATION_ID"));
 
@@ -249,7 +246,7 @@ public class PaymentDAO {
 
             pStatement.setInt(7, payment.getCustomerId());
             pStatement.setInt(8, payment.getReservationId());
-            
+
             pStatement.setInt(9, payment.getPaymentId());
 
             result = pStatement.executeUpdate();
@@ -279,8 +276,8 @@ public class PaymentDAO {
         // the ResultSet will all be closed.
         try (Connection connection = ConnectionHelper.getConnection();
                 // Using PreparedStatements to guard against SQL Injection
-                PreparedStatement pStatement = connection.prepareStatement(createQuery);) {
-            
+                PreparedStatement pStatement = connection.prepareStatement(createQuery, Statement.RETURN_GENERATED_KEYS);) {
+
             pStatement.setString(1, payment.getCardType());
             pStatement.setString(2, payment.getCardNumber());
             pStatement.setString(3, payment.getCardExpiration());
@@ -293,9 +290,18 @@ public class PaymentDAO {
             pStatement.setInt(7, payment.getReservationId());
 
             result = pStatement.executeUpdate();
+
+            try (ResultSet generatedKeys = pStatement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    payment.setPaymentId(generatedKeys.getInt(1));
+                } else {
+                    throw new SQLException("Creating PAYMENT failed, no ID obtained.");
+                }
+            }
+
         }
         log.log(Level.INFO, "Created payment with paymentID: {0}", payment.getPaymentId());
-        return result;
+        return payment.getPaymentId();
     }
 
     /**

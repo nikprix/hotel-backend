@@ -6,6 +6,7 @@ import com.mykolabs.hotel.beans.Payment;
 import com.mykolabs.hotel.beans.Reservation;
 import com.mykolabs.hotel.beans.Room;
 import com.mykolabs.hotel.util.ConnectionHelper;
+import com.mysql.jdbc.Statement;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -71,7 +72,7 @@ public class CustomerDAO {
                 while (resultSet.next()) {
 
                     Customer customerData = new Customer();
-                    
+
                     customerData.setCustomerId(resultSet.getInt("CUSTOMER_ID"));
                     customerData.setFirstName(resultSet.getString("FIRST_NAME"));
                     customerData.setLastName(resultSet.getString("LAST_NAME"));
@@ -79,7 +80,7 @@ public class CustomerDAO {
                     customerData.setCity(resultSet.getString("CITY"));
                     customerData.setState(resultSet.getString("STATE"));
                     customerData.setPhone(resultSet.getString("PHONE"));
-                    
+
                     rows.add(customerData);
                 }
             }
@@ -162,7 +163,7 @@ public class CustomerDAO {
             pStatement.setString(5, customer.getCity());
             pStatement.setString(6, customer.getState());
             pStatement.setString(7, customer.getPhone());
-            
+
             pStatement.setInt(8, customer.getCustomerId());
 
             result = pStatement.executeUpdate();
@@ -191,8 +192,8 @@ public class CustomerDAO {
         // the ResultSet will all be closed.
         try (Connection connection = ConnectionHelper.getConnection();
                 // Using PreparedStatements to guard against SQL Injection
-                PreparedStatement pStatement = connection.prepareStatement(createQuery);) {
-            
+                PreparedStatement pStatement = connection.prepareStatement(createQuery, Statement.RETURN_GENERATED_KEYS);) {
+
             pStatement.setString(1, customer.getFirstName());
             pStatement.setString(2, customer.getLastName());
             pStatement.setString(3, customer.getAddress());
@@ -201,9 +202,18 @@ public class CustomerDAO {
             pStatement.setString(6, customer.getPhone());
 
             result = pStatement.executeUpdate();
+
+            try (ResultSet generatedKeys = pStatement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    customer.setCustomerId(generatedKeys.getInt(1));
+                } else {
+                    throw new SQLException("Creating CUSTOMER failed, no ID obtained.");
+                }
+            }
+
         }
         log.log(Level.INFO, "Created customer with customerID: {0}", customer.getCustomerId());
-        return result;
+        return customer.getCustomerId();
     }
 
     /**

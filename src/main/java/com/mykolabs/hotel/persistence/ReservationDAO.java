@@ -96,7 +96,7 @@ public class ReservationDAO {
                     //reservationsData.setEmployeeId(employee);
                     reservationsData.setCustomerId(resultSet.getInt("CUSTOMER_ID"));
                     reservationsData.setRoomNumberId(resultSet.getInt("ROOM_NUMBER"));
-                    reservationsData.setEmployteeId(resultSet.getInt("EMPLOYEE_ID"));
+                    reservationsData.setEmployeeId(resultSet.getInt("EMPLOYEE_ID"));
 
                     rows.add(reservationsData);
                 }
@@ -299,7 +299,7 @@ public class ReservationDAO {
                     //reservationData.setEmployeeId(employee);
                     reservationData.setCustomerId(resultSet.getInt("CUSTOMER_ID"));
                     reservationData.setRoomNumberId(resultSet.getInt("ROOM_NUMBER"));
-                    reservationData.setEmployteeId(resultSet.getInt("EMPLOYEE_ID"));
+                    reservationData.setEmployeeId(resultSet.getInt("EMPLOYEE_ID"));
 
                 }
             }
@@ -340,7 +340,7 @@ public class ReservationDAO {
 
             pStatement.setInt(4, reservation.getCustomerId());
             pStatement.setInt(5, reservation.getRoomNumberId());
-            pStatement.setInt(6, reservation.getEmployteeId());
+            pStatement.setInt(6, reservation.getEmployeeId());
 
             pStatement.setInt(7, reservation.getReservationId());
 
@@ -382,7 +382,7 @@ public class ReservationDAO {
 
             pStatement.setInt(3, reservation.getCustomerId());
             pStatement.setInt(4, reservation.getRoomNumberId());
-            pStatement.setInt(5, reservation.getEmployteeId());
+            pStatement.setInt(5, reservation.getEmployeeId());
 
             result = pStatement.executeUpdate();
 
@@ -397,7 +397,8 @@ public class ReservationDAO {
         }
         log.log(Level.INFO, "Create status: {0}", result);
         log.log(Level.INFO, "Created reservation with reservationID: {0}", reservation.getReservationId());
-        return result;
+        
+        return reservation.getReservationId();
     }
     
         /**
