@@ -14,9 +14,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -80,8 +82,8 @@ public class ReservationDAO {
                     Reservation reservationsData = new Reservation();
 
                     reservationsData.setReservationId(resultSet.getInt("RESERVATION_ID"));
-                    reservationsData.setCheckinDate(resultSet.getDate("CHECKIN_DATE"));
-                    reservationsData.setCheckoutDate(resultSet.getDate("CHECKOUT_DATE"));
+                    reservationsData.setCheckinDate(resultSet.getTimestamp("CHECKIN_DATE").toLocalDateTime());
+                    reservationsData.setCheckoutDate(resultSet.getTimestamp("CHECKOUT_DATE").toLocalDateTime());
 
                     //CustomerDAO customerDAO = new CustomerDAO();
                     //Customer customer = customerDAO.getCustomer(resultSet.getInt("CUSTOMER_ID"));
@@ -133,8 +135,8 @@ public class ReservationDAO {
                 // Using PreparedStatements to guard against SQL Injection
                 PreparedStatement pStatement = connection.prepareStatement(selectQuery);) {
 
-            pStatement.setDate(1, convertToSqlDate(currentDate.getCurrentDate()));
-            pStatement.setDate(2, convertToSqlDate(currentDate.getCurrentDate()));
+            pStatement.setDate(1, convertLocalDateTimeToSqlDate(currentDate.getCurrentDate()));
+            pStatement.setDate(2, convertLocalDateTimeToSqlDate(currentDate.getCurrentDate()));
 
             try (ResultSet resultSet = pStatement.executeQuery();) {
                 while (resultSet.next()) {
@@ -145,7 +147,7 @@ public class ReservationDAO {
                     todayReservationData.setFirstName(resultSet.getString("FIRST_NAME"));
                     todayReservationData.setLastName(resultSet.getString("LAST_NAME"));
                     todayReservationData.setRoomNumber(resultSet.getInt("ROOM_NUMBER"));
-                    todayReservationData.setCheckinDate(resultSet.getDate("CHECKIN_DATE"));
+                    todayReservationData.setCheckinDate(resultSet.getTimestamp("CHECKIN_DATE").toLocalDateTime());
 
                     // printing converted date and time to the server logs:
                     DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -167,6 +169,8 @@ public class ReservationDAO {
      * @throws java.sql.SQLException
      */
     public List<TodayReservation> getAllReservationsWithCustomerData() throws SQLException {
+        
+        log.log(Level.INFO, "=====Entering getAllReservationsWithCustomerData() ====");
 
         List<TodayReservation> rows = new ArrayList<>();
 
@@ -192,11 +196,14 @@ public class ReservationDAO {
                     todayReservationData.setFirstName(resultSet.getString("FIRST_NAME"));
                     todayReservationData.setLastName(resultSet.getString("LAST_NAME"));
                     todayReservationData.setRoomNumber(resultSet.getInt("ROOM_NUMBER"));
-                    todayReservationData.setCheckinDate(resultSet.getDate("CHECKIN_DATE"));
+                    todayReservationData.setCheckinDate(resultSet.getTimestamp("CHECKIN_DATE").toLocalDateTime());
 
                     // printing converted date and time to the server logs:
-                    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                    log.log(Level.INFO, "=====Retrieved Checking Date/Time====: {0}", dateFormat.format(resultSet.getDate("CHECKIN_DATE")));
+//                    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+//                    log.log(Level.INFO, "=====Retrieved Checking Date/Time====: {0}", dateFormat.format(resultSet.getDate("CHECKIN_DATE")));
+                    
+//                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    log.log(Level.INFO, "=====Retrieved Checking Date/Time====: {0}", todayReservationData.getCheckinDate().toString());
 
                     rows.add(todayReservationData);
                 }
@@ -230,7 +237,7 @@ public class ReservationDAO {
         try (Connection connection = ConnectionHelper.getConnection();
                 // Using PreparedStatements to guard against SQL Injection
                 PreparedStatement pStatement = connection.prepareStatement(selectQuery);) {
-            
+
             pStatement.setDate(1, convertToSqlDate(reservationSearch.getCheckinDate()));
             pStatement.setDate(2, convertToSqlDate(reservationSearch.getCheckinDate()));
 
@@ -243,7 +250,7 @@ public class ReservationDAO {
                     todayReservationData.setFirstName(resultSet.getString("FIRST_NAME"));
                     todayReservationData.setLastName(resultSet.getString("LAST_NAME"));
                     todayReservationData.setRoomNumber(resultSet.getInt("ROOM_NUMBER"));
-                    todayReservationData.setCheckinDate(resultSet.getDate("CHECKIN_DATE"));
+                    todayReservationData.setCheckinDate(resultSet.getTimestamp("CHECKIN_DATE").toLocalDateTime());
 
                     // printing converted date and time to the server logs:
                     DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -285,8 +292,8 @@ public class ReservationDAO {
                 while (resultSet.next()) {
 
                     reservationData.setReservationId(resultSet.getInt("RESERVATION_ID"));
-                    reservationData.setCheckinDate(resultSet.getDate("CHECKIN_DATE"));
-                    reservationData.setCheckoutDate(resultSet.getDate("CHECKOUT_DATE"));
+                    reservationData.setCheckinDate(resultSet.getTimestamp("CHECKIN_DATE").toLocalDateTime());
+                    reservationData.setCheckoutDate(resultSet.getTimestamp("CHECKIN_DATE").toLocalDateTime());
 
                     //CustomerDAO customerDAO = new CustomerDAO();
                     //Customer customer = customerDAO.getCustomer(resultSet.getInt("CUSTOMER_ID"));
@@ -332,8 +339,8 @@ public class ReservationDAO {
                 PreparedStatement pStatement = connection.prepareStatement(updateQuery);) {
 
             pStatement.setInt(1, reservation.getReservationId());
-            pStatement.setDate(2, convertToSqlDate(reservation.getCheckinDate()));
-            pStatement.setDate(3, convertToSqlDate(reservation.getCheckoutDate()));
+            pStatement.setDate(2, convertLocalDateTimeToSqlDate(reservation.getCheckinDate()));
+            pStatement.setDate(3, convertLocalDateTimeToSqlDate(reservation.getCheckoutDate()));
             //pStatement.setInt(4, reservation.getCustomerId().getCustomerId());
             //pStatement.setInt(5, reservation.getRoomNumber().getRoomNumber());
             //pStatement.setInt(6, reservation.getEmployeeId().getEmployeeId());
@@ -374,8 +381,10 @@ public class ReservationDAO {
                 // Using PreparedStatements to guard against SQL Injection
                 PreparedStatement pStatement = connection.prepareStatement(createQuery, Statement.RETURN_GENERATED_KEYS);) {
 
-            pStatement.setDate(1, convertToSqlDate(reservation.getCheckinDate()));
-            pStatement.setDate(2, convertToSqlDate(reservation.getCheckoutDate()));
+            log.log(Level.INFO, "Printing DATE - UTIL obj: {0}", reservation.getCheckinDate());
+            log.log(Level.INFO, "Printing DATE - SQL obj: {0}", convertLocalDateTimeToSqlDate(reservation.getCheckinDate()));
+            pStatement.setDate(1, convertLocalDateTimeToSqlDate(reservation.getCheckinDate()));
+            pStatement.setDate(2, convertLocalDateTimeToSqlDate(reservation.getCheckoutDate()));
             //pStatement.setInt(3, reservation.getCustomerId().getCustomerId());
             //pStatement.setInt(4, reservation.getRoomNumber().getRoomNumber());
             //pStatement.setInt(5, reservation.getEmployeeId().getEmployeeId());
@@ -397,13 +406,13 @@ public class ReservationDAO {
         }
         log.log(Level.INFO, "Create status: {0}", result);
         log.log(Level.INFO, "Created reservation with reservationID: {0}", reservation.getReservationId());
-        
+
         return reservation.getReservationId();
     }
-    
-        /**
-     * This method deletes a single Reservation record based on the criteria
-     * of the primary key field ID value.
+
+    /**
+     * This method deletes a single Reservation record based on the criteria of
+     * the primary key field ID value.
      *
      * @param reservationId
      * @return The number of records deleted, should be 0 or 1
@@ -427,9 +436,11 @@ public class ReservationDAO {
             result = pStatement.executeUpdate();
         }
         log.log(Level.INFO, "Create status: {0}", result);
-        
-        if(result == 1) log.log(Level.INFO, "Removed reservation with reservationID: {0}", reservationId);
-        
+
+        if (result == 1) {
+            log.log(Level.INFO, "Removed reservation with reservationID: {0}", reservationId);
+        }
+
         return result;
     }
 
@@ -441,6 +452,15 @@ public class ReservationDAO {
      */
     public java.sql.Date convertToSqlDate(java.util.Date date) {
         return new java.sql.Date(date.getTime());
+    }
+    
+    /**
+     * Converts LocalDateTime to SQL Date
+     * @param dateTime
+     * @return 
+     */
+    public java.sql.Date convertLocalDateTimeToSqlDate(LocalDateTime dateTime){    
+        return new java.sql.Date(dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
     }
 
     /**

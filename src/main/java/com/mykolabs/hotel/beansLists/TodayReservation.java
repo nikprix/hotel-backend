@@ -6,12 +6,15 @@
 package com.mykolabs.hotel.beansLists;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.mykolabs.hotel.persistence.ReservationDAO;
+import com.mykolabs.hotel.util.CustomDateDeserializer;
 import com.mykolabs.hotel.util.CustomDateSerializer;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,7 +36,8 @@ public class TodayReservation {
     private int roomNumber;
     
     @JsonSerialize(using = CustomDateSerializer.class)
-    private Date checkinDate;
+    //@JsonDeserialize(using = CustomDateDeserializer.class)
+    private LocalDateTime checkinDate;
 
     public int getReservationId() {
         return reservationId;
@@ -67,11 +71,11 @@ public class TodayReservation {
         this.roomNumber = roomNumber;
     }
 
-    public Date getCheckinDate() {
+    public LocalDateTime getCheckinDate() {
         return checkinDate;
     }
 
-    public void setCheckinDate(Date checkinDate) {
+    public void setCheckinDate(LocalDateTime checkinDate) {
         this.checkinDate = checkinDate;
     }
 

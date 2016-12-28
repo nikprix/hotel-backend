@@ -73,7 +73,7 @@ public class ReservationsResource extends ResourceConfig {
      * @throws java.sql.SQLException
      */
     @GET
-    @Secured
+    //@Secured
     @Produces(MediaType.APPLICATION_JSON)
     public AllReservationListWithCustomer getAllReservations() throws SQLException {
 

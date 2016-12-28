@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.mykolabs.hotel.util.CustomDateDeserializer;
 import com.mykolabs.hotel.util.CustomDateSerializer;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
@@ -57,15 +58,15 @@ public class Reservation implements Serializable {
     @Column(name = "CHECKIN_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     @JsonSerialize(using = CustomDateSerializer.class)
-    //@JsonDeserialize(using = CustomDateDeserializer.class)
-    private Date checkinDate;
+    @JsonDeserialize(using = CustomDateDeserializer.class)
+    private LocalDateTime checkinDate;
     @Basic(optional = false)
     @NotNull
     @Column(name = "CHECKOUT_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     @JsonSerialize(using = CustomDateSerializer.class)
-    //@JsonDeserialize(using = CustomDateDeserializer.class)
-    private Date checkoutDate;
+    @JsonDeserialize(using = CustomDateDeserializer.class)
+    private LocalDateTime checkoutDate;
 
 //    @OneToMany(cascade = CascadeType.ALL, mappedBy = "reservationId")
 //    @JsonIgnore
@@ -98,7 +99,7 @@ public class Reservation implements Serializable {
         this.reservationId = reservationId;
     }
 
-    public Reservation(Integer reservationId, Date checkinDate, Date checkoutDate) {
+    public Reservation(Integer reservationId, LocalDateTime checkinDate, LocalDateTime checkoutDate) {
         this.reservationId = reservationId;
         this.checkinDate = checkinDate;
         this.checkoutDate = checkoutDate;
@@ -112,19 +113,19 @@ public class Reservation implements Serializable {
         this.reservationId = reservationId;
     }
 
-    public Date getCheckinDate() {
+    public LocalDateTime getCheckinDate() {
         return checkinDate;
     }
 
-    public void setCheckinDate(Date checkinDate) {
+    public void setCheckinDate(LocalDateTime checkinDate) {
         this.checkinDate = checkinDate;
     }
 
-    public Date getCheckoutDate() {
+    public LocalDateTime getCheckoutDate() {
         return checkoutDate;
     }
 
-    public void setCheckoutDate(Date checkoutDate) {
+    public void setCheckoutDate(LocalDateTime checkoutDate) {
         this.checkoutDate = checkoutDate;
     }
 

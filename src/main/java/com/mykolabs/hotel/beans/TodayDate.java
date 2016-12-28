@@ -5,6 +5,11 @@
  */
 package com.mykolabs.hotel.beans;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.mykolabs.hotel.util.CustomDateDeserializer;
+import com.mykolabs.hotel.util.CustomDateSerializer;
+import java.time.LocalDateTime;
 import java.util.Date;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -15,13 +20,15 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class TodayDate {
     
-    private Date currentDate;
+    @JsonSerialize(using = CustomDateSerializer.class)
+    @JsonDeserialize(using = CustomDateDeserializer.class)
+    private LocalDateTime currentDate;
 
-    public Date getCurrentDate() {
+    public LocalDateTime getCurrentDate() {
         return currentDate;
     }
 
-    public void setCurrentDate(Date currentDate) {
+    public void setCurrentDate(LocalDateTime currentDate) {
         this.currentDate = currentDate;
     }
    
