@@ -293,7 +293,7 @@ public class ReservationDAO {
 
                     reservationData.setReservationId(resultSet.getInt("RESERVATION_ID"));
                     reservationData.setCheckinDate(resultSet.getTimestamp("CHECKIN_DATE").toLocalDateTime());
-                    reservationData.setCheckoutDate(resultSet.getTimestamp("CHECKIN_DATE").toLocalDateTime());
+                    reservationData.setCheckoutDate(resultSet.getTimestamp("CHECKOUT_DATE").toLocalDateTime());
 
                     //CustomerDAO customerDAO = new CustomerDAO();
                     //Customer customer = customerDAO.getCustomer(resultSet.getInt("CUSTOMER_ID"));
@@ -339,8 +339,8 @@ public class ReservationDAO {
                 PreparedStatement pStatement = connection.prepareStatement(updateQuery);) {
 
             pStatement.setInt(1, reservation.getReservationId());
-            pStatement.setDate(2, convertLocalDateTimeToSqlDate(reservation.getCheckinDate()));
-            pStatement.setDate(3, convertLocalDateTimeToSqlDate(reservation.getCheckoutDate()));
+            pStatement.setTimestamp(2, Timestamp.valueOf(reservation.getCheckinDate()));
+            pStatement.setTimestamp(3, Timestamp.valueOf(reservation.getCheckoutDate()));
             //pStatement.setInt(4, reservation.getCustomerId().getCustomerId());
             //pStatement.setInt(5, reservation.getRoomNumber().getRoomNumber());
             //pStatement.setInt(6, reservation.getEmployeeId().getEmployeeId());
@@ -383,8 +383,8 @@ public class ReservationDAO {
 
             log.log(Level.INFO, "Printing DATE - UTIL obj: {0}", reservation.getCheckinDate());
             log.log(Level.INFO, "Printing DATE - SQL obj: {0}", convertLocalDateTimeToSqlDate(reservation.getCheckinDate()));
-            pStatement.setDate(1, convertLocalDateTimeToSqlDate(reservation.getCheckinDate()));
-            pStatement.setDate(2, convertLocalDateTimeToSqlDate(reservation.getCheckoutDate()));
+            pStatement.setTimestamp(1, Timestamp.valueOf(reservation.getCheckinDate()));
+            pStatement.setTimestamp(2, Timestamp.valueOf(reservation.getCheckoutDate()));
             //pStatement.setInt(3, reservation.getCustomerId().getCustomerId());
             //pStatement.setInt(4, reservation.getRoomNumber().getRoomNumber());
             //pStatement.setInt(5, reservation.getEmployeeId().getEmployeeId());
